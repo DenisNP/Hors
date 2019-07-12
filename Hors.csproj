@@ -5,10 +5,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="morelinq" Version="3.1.1" />
-    </ItemGroup>
-
-    <ItemGroup>
       <None Update="time_words.txt">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>

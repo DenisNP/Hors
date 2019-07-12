@@ -1,6 +1,5 @@
 using System;
 using System.Globalization;
-using MoreLinq;
 
 namespace Hors.Models
 {
@@ -14,7 +13,7 @@ namespace Hors.Models
 
         public void Fix(params FixPeriod[] fixes)
         {
-            fixes.ForEach(f => Fixed |= (byte) f);
+            foreach (var f in fixes) Fixed |= (byte) f;
         }
 
         public void FixDownTo(FixPeriod period)

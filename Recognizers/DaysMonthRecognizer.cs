@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using Hors.Dict;
 using Hors.Models;
+using Hors.Utils;
 
 namespace Hors.Recognizers
 {

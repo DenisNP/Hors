@@ -1,9 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using Hors.Models;
 
-namespace Hors
+namespace Hors.Models
 {
     public enum FixPeriod
     {

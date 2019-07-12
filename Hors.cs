@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Hors.Models;
 using Hors.Recognizers;
+using Hors.Utils;
 
 namespace Hors
 {
@@ -11,13 +12,13 @@ namespace Hors
     {
         private readonly List<Recognizer> _recognizers = DefaultRecognizers();
 
-        public (List<string> text, List<DateTimeToken> dates) Parse(string text, DateTime userDate)
+        public HorsParseResult Parse(string text, DateTime userDate)
         {
             var tokens = Regex.Split(text, "\\s+");
             return Parse(tokens, userDate);
         }
 
-        public (List<string> text, List<DateTimeToken> dates) Parse(IEnumerable<string> tokensList, DateTime userDate)
+        public HorsParseResult Parse(IEnumerable<string> tokensList, DateTime userDate)
         {
             var tokens = tokensList.ToList();
             ParserUtils.FixZeros(tokens);
@@ -28,26 +29,10 @@ namespace Hors
                 Pattern = string.Join("", tokens.Select(ParserExtractors.CreatePatternFromToken)),
                 Tokens = tokens
             };
-
-            Console.WriteLine(data);
-            Console.WriteLine();
-
             // do work
             var userDateFixed = new DateTime(userDate.Year, userDate.Month, userDate.Day);
             _recognizers.ForEach(r => r.ParseTokens(data, userDateFixed));
 
-            Console.WriteLine(string.Join(" ", data.Tokens));
-            foreach (var d in data.Dates)
-            {
-                if (d != null)
-                {
-                    Console.WriteLine(d);
-                    Console.WriteLine();
-                }
-            }
-
-            Console.WriteLine(data.Pattern);
-            
             // collapse dates first batch
             Recognizer.ForAllMatches(data.GetPattern, "@(@|[fo]@)+", m => CollapseDates(m, data, userDate));
             Recognizer.ForAllMatches(data.GetPattern, "t@(@|t@)+", m => CollapseDates(m, data, userDate));
@@ -61,7 +46,7 @@ namespace Hors
                 );
             
             // return result
-            return (data.Tokens, finalPeriods);
+            return new HorsParseResult(data.Tokens, finalPeriods);
         }
 
         private bool CreateDatePeriod(Match match, DatesRawData data, DateTime userDate, List<DateTimeToken> finalPeriods)
@@ -319,25 +304,6 @@ namespace Hors
         public void RemoveRecognizers(params Type[] typesToRemove)
         {
             _recognizers.RemoveAll(r => typesToRemove.Any(t => t == r.GetType()));
-        }
-
-        private static void WriteAll(string s, List<string> tokens, List<AbstractPeriod> list)
-        {
-            /* Console.Write(s + ": ");
-            tokens.ForEach(t =>
-            {
-                var idx = ExtractIndex(t);
-                if (idx != -1)
-                {
-                    var d = list[idx];
-                    Console.Write((d.Type == AbstractPeriodType.Date ? d.Date.ToString() : d.Span.ToString()) + " ");
-                }
-                else
-                {
-                    Console.Write(t + " ");
-                }
-            });
-            Console.WriteLine(""); */
         }
     }
 }

@@ -1,6 +1,7 @@
 using Hors.Dict;
+using Hors.Models;
 
-namespace Hors
+namespace Hors.Utils
 {
     internal static class ParserExtractors
     {
