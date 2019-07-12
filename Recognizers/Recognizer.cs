@@ -27,11 +27,11 @@ namespace Hors.Recognizers
 
                 match = null;
                 var matches = Regex.Matches(input.Invoke(), pattern);
-                for (var index = 0; index < matches.Count; index++)
+                for (var i = 0; i < matches.Count; i++)
                 {
-                    if (!indexesToSkip.Contains(index))
+                    if (!indexesToSkip.Contains(matches[i].Index))
                     {
-                        match = matches[index];
+                        match = matches[i];
                         break;
                     }
                 }

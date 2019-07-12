@@ -8,7 +8,7 @@ using Hors.Utils;
 
 namespace Hors
 {
-    public class Hors
+    public class HorsTextParser
     {
         private readonly List<Recognizer> _recognizers = DefaultRecognizers();
 
@@ -133,7 +133,7 @@ namespace Hors
             finalPeriods.Add(dateToSave);
             
             // fix final pattern
-            data.Pattern = $"{data.Pattern.Substring(0, match.Index + 1)}${data.Pattern.Substring(match.Index + match.Length)}";
+            data.Pattern = $"{data.Pattern.Substring(0, match.Index)}${data.Pattern.Substring(match.Index + match.Length)}";
             data.Tokens[match.Index] = $"{{{nextIndex}}}";
             data.Dates[match.Index] = null;
             if (match.Length > 1)

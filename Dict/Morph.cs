@@ -1,6 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Hors.Dict
 {
@@ -8,10 +12,17 @@ namespace Hors.Dict
     {
         private static readonly Dictionary<string, (string normalForm, byte plural)> Storage = new Dictionary<string, (string, byte)>();
         private static bool _loaded;
-
+        private static string _lastNormalForm = "";
+        
         public static void Load()
         {
-            AddDictionary("time_words.txt");
+            var assembly = Assembly.GetCallingAssembly();
+            var file = assembly.GetManifestResourceStream("Hors.Dict.time_words.txt");
+
+            if (file != null)
+            {
+                LoadFromStreamReader(new StreamReader(file, Encoding.UTF8));
+            }
             _loaded = true;
         }
 
@@ -19,31 +30,39 @@ namespace Hors.Dict
         {
             using (var file = new StreamReader(fileName))
             {
-                var lastNormalForm = "";
-                
-                while (!file.EndOfStream)
-                {
-                    var line = file.ReadLine();
-                    if (line == string.Empty)
-                    {
-                        // new normal form
-                        lastNormalForm = "";
-                        continue;
-                    }
-                    
-                    // read line data
-                    var tokens = line.Split('|');
-                    var word = tokens[0];
-                    var plural = byte.Parse(tokens[1]);
-
-                    if (lastNormalForm == "")
-                    {
-                        lastNormalForm = word;
-                    }
-
-                    Storage[word] = (lastNormalForm, plural);
-                }
+                LoadFromStreamReader(file);
             }
+        }
+
+        private static void LoadFromStreamReader(StreamReader file)
+        {
+            while (!file.EndOfStream)
+            {
+                LoadLine(file.ReadLine());
+            }
+        }
+
+        private static void LoadLine(string line)
+        {
+            if (line == string.Empty)
+            {
+                // new normal form
+                _lastNormalForm = "";
+                return;
+            }
+                    
+            // read line data
+            var tokens = line.Split('|');
+            var word = tokens[0];
+            var plural = byte.Parse(tokens[1]);
+
+            if (_lastNormalForm == "")
+            {
+                _lastNormalForm = word;
+            }
+
+            Storage[word] = (_lastNormalForm, plural);
+
         }
 
         public static string GetNormalForm(string rawWord, LemmaSearchOptions option = LemmaSearchOptions.All)

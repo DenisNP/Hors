@@ -2,12 +2,21 @@
 
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <PackageVersion>0.0.9</PackageVersion>
+        <Title>Hors</Title>
+        <Authors>Denis Peshekhonov</Authors>
+        <Description>Natural language processing of dates and times in Russian</Description>
+        <Copyright>Denis Peshekhonov, 2019</Copyright>
     </PropertyGroup>
 
     <ItemGroup>
-      <None Update="time_words.txt">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
+      <PackageReference Include="nunit" Version="3.12.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="Dict\time_words.txt" />
+      <EmbeddedResource Include="Dict\time_words.txt" />
     </ItemGroup>
 
 </Project>
