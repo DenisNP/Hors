@@ -48,12 +48,12 @@ namespace Hors.Recognizers
             }
             
             // remove all scanned tokens
-            RemoveRange(data, match.Index, match.Length);
+            data.RemoveRange(match.Index, match.Length);
             
             // insert new dates
             if (dates.Count > 0)
             {
-                InsertDates(data, match.Index, dates.ToArray());
+                data.InsertDates(match.Index, dates.ToArray());
             }
 
             return true;

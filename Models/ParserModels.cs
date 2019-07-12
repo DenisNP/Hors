@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Globalization;
 
 namespace Hors.Models
@@ -13,18 +12,6 @@ namespace Hors.Models
         Week = 8,
         Month = 16,
         Year = 32
-    }
-
-    public class DatesRawData
-    {
-        public List<string> Tokens;
-        public string Pattern;
-        public List<AbstractPeriod> Dates;
-
-        public string GetPattern()
-        {
-            return Pattern;
-        }
     }
 
     public struct DateTimeToken

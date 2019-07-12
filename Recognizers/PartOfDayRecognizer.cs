@@ -43,7 +43,7 @@ namespace Hors.Recognizers
                     date.Fix(FixPeriod.TimeUncertain);
                 
                     // remove and insert
-                    RemoveAndInsert(data, match.Index, match.Length, date);
+                    data.RemoveAndInsert(match.Index, match.Length, date);
 
                     return true;
                 }
