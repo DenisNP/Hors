@@ -15,6 +15,7 @@ namespace Hors.Utils
             if (Morph.HasOneOfLemmas(t, Keywords.PreviousPostfix)) return "b";
             if (Morph.HasOneOfLemmas(t, Keywords.AfterPostfix)) return "l";
             if (Morph.HasOneOfLemmas(t, Keywords.After)) return "i";
+            if (Morph.HasOneOfLemmas(t, Keywords.Holiday)) return "W";
             
             var p = PeriodFromToken(t);
             switch (p)

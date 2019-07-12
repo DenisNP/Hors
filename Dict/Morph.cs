@@ -83,10 +83,10 @@ namespace Hors.Dict
             return null;
         }
 
-        public static bool HasLemma(string rawWord, string rawLemma)
+        public static bool HasLemma(string rawWord, string rawLemma, LemmaSearchOptions option = LemmaSearchOptions.All)
         {
             if (rawWord.ToLower() == rawLemma) return true;
-            var lemma = GetNormalForm(rawWord);
+            var lemma = GetNormalForm(rawWord, option);
             return lemma != null && lemma == rawLemma;
         }
 

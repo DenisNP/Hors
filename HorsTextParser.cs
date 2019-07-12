@@ -30,8 +30,7 @@ namespace Hors
                 Tokens = tokens
             };
             // do work
-            var userDateFixed = new DateTime(userDate.Year, userDate.Month, userDate.Day);
-            _recognizers.ForEach(r => r.ParseTokens(data, userDateFixed));
+            _recognizers.ForEach(r => r.ParseTokens(data, userDate));
 
             // collapse dates first batch
             Recognizer.ForAllMatches(data.GetPattern, "@(@|[fo]@)+", m => CollapseDates(m, data, userDate));
@@ -141,7 +140,8 @@ namespace Hors
                     datePeriod.Date = new DateTime(userDate.Year, datePeriod.Date.Month, datePeriod.Date.Day);
                     break;
                 case FixPeriod.Day:
-                    datePeriod.Date = AbstractPeriod.TakeDayOfWeekFrom(userDate, datePeriod.Date);
+                    var newDate = AbstractPeriod.TakeDayOfWeekFrom(userDate, datePeriod.Date);
+                    datePeriod.Date = new DateTime(newDate.Year, newDate.Month, newDate.Day);
                     break;
                 case FixPeriod.TimeUncertain:
                 case FixPeriod.Time:
@@ -157,6 +157,18 @@ namespace Hors
                     datePeriod.Date.Day,
                     datePeriod.Time.Hours,
                     datePeriod.Time.Minutes,
+                    0,
+                    0
+                );
+            }
+            else
+            {
+                datePeriod.Date = new DateTime(
+                    datePeriod.Date.Year, 
+                    datePeriod.Date.Month, 
+                    datePeriod.Date.Day,
+                    0,
+                    0,
                     0,
                     0
                 );
@@ -263,6 +275,7 @@ namespace Hors
         {
             return new List<Recognizer>
             {
+                new HolidaysRecognizer(),
                 new DaysMonthRecognizer(),
                 new MonthRecognizer(),
                 new RelativeDayRecognizer(),
