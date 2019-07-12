@@ -9,7 +9,7 @@ namespace Hors.Recognizers
 {
     public class DaysMonthRecognizer : Recognizer
     {
-        internal override string GetRegexPattern()
+        protected override string GetRegexPattern()
         {
             return "((0N?)+)(M|#)"; // 26 и 27 января/числа (2017 (года)/17 года)
         }

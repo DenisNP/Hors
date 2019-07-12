@@ -6,7 +6,7 @@ namespace Hors.Recognizers
 {
     public class PartOfDayRecognizer : Recognizer
     {
-        internal override string GetRegexPattern()
+        protected override string GetRegexPattern()
         {
             return "(@)?f?([ravgdn])f?(@)?"; // (дата) (в/с) утром/днём/вечером/ночью (в/с) (дата)
         }
@@ -43,8 +43,7 @@ namespace Hors.Recognizers
                     date.Fix(FixPeriod.TimeUncertain);
                 
                     // remove and insert
-                    RemoveRange(data, match.Index, match.Length);
-                    InsertDates(data, match.Index, date);
+                    RemoveAndInsert(data, match.Index, match.Length, date);
 
                     return true;
                 }

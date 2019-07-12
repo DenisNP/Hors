@@ -7,7 +7,7 @@ namespace Hors.Recognizers
 {
     public class TimeSpanRecognizer : Recognizer
     {
-        internal override string GetRegexPattern()
+        protected override string GetRegexPattern()
         {
             return "(i)?((0?[Ymwdhe]N?)+)([bl])?"; // (через) год и месяц и 2 дня 4 часа 10 минут (спустя/назад)
         }
@@ -82,8 +82,7 @@ namespace Hors.Recognizers
                 date.Time = offset.Offset;
                 
                 // remove and insert
-                RemoveRange(data, match.Index, match.Length);
-                InsertDates(data, match.Index, date);
+                RemoveAndInsert(data, match.Index, match.Length, date);
 
                 return true;
             }

@@ -38,19 +38,31 @@ namespace Hors.Recognizers
             }
         }
 
-        protected void RemoveRange(DatesRawData data, int start, int count)
+        protected static void RemoveRange(DatesRawData data, int start, int count)
         {
             data.Tokens.RemoveRange(start, count);
             data.Dates.RemoveRange(start, count);
             data.Pattern = data.Pattern.Remove(start, count);
         }
 
-        protected void InsertDates(DatesRawData data, int index, params AbstractPeriod[] dates)
+        protected static void InsertDates(DatesRawData data, int index, params AbstractPeriod[] dates)
         {
             InsertData(data, index, "@", dates);
         }
 
-        internal void InsertData(DatesRawData data, int index, string placeholder, params AbstractPeriod[] dates)
+        protected static void RemoveAndInsert(DatesRawData data, int start, int removeCount, params AbstractPeriod[] dates)
+        {
+            RemoveRange(data, start, removeCount);
+            InsertDates(data, start, dates);
+        }
+
+        protected static void InsertSymbol(DatesRawData data, int index, string prefix)
+        {
+            InsertData(data, index, prefix, new AbstractPeriod());
+            data.Dates[index] = null;
+        }
+
+        private static void InsertData(DatesRawData data, int index, string placeholder, params AbstractPeriod[] dates)
         {
             data.Dates.InsertRange(index, dates);
 
@@ -59,7 +71,7 @@ namespace Hors.Recognizers
             data.Pattern = $"{data.Pattern.Substring(0, index)}{string.Join("", placeholders)}{data.Pattern.Substring(index)}";
         }
 
-        internal abstract string GetRegexPattern();
+        protected abstract string GetRegexPattern();
 
         protected abstract bool ParseMatch(DatesRawData data, Match match, DateTime userDate);
     }

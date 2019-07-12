@@ -6,7 +6,7 @@ namespace Hors.Recognizers
 {
     public class RelativeDateRecognizer : Recognizer
     {
-        internal override string GetRegexPattern()
+        protected override string GetRegexPattern()
         {
             return "([usxy])([Ymwd])"; // [в/на] следующей/этой/предыдущей год/месяц/неделе/день
         }
@@ -50,8 +50,7 @@ namespace Hors.Recognizers
             }
             
             // remove and insert
-            RemoveRange(data, match.Index, match.Length);
-            InsertDates(data, match.Index, date);
+            RemoveAndInsert(data, match.Index, match.Length, date);
 
             return true;
         }

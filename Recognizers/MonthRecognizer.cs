@@ -8,7 +8,7 @@ namespace Hors.Recognizers
 {
     public class MonthRecognizer : Recognizer
     {
-        internal override string GetRegexPattern()
+        protected override string GetRegexPattern()
         {
             return "([usxy])?M"; // [в] (прошлом|этом|следующем) марте
         }
@@ -47,10 +47,7 @@ namespace Hors.Recognizers
                 yearFixed = true;
             }
             
-            // remove all scanned tokens
-            RemoveRange(data, match.Index, match.Length);
-            
-            // insert date
+            // create date
             var date = new AbstractPeriod
             {
                 Date = new DateTime(year, month, 1)
@@ -60,7 +57,8 @@ namespace Hors.Recognizers
             date.Fix(FixPeriod.Month);
             if (yearFixed) date.Fix(FixPeriod.Year);
             
-            InsertDates(data, match.Index, date);
+            // remove and insert
+            RemoveAndInsert(data, match.Index, match.Length, date);
 
             return true;
         }

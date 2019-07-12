@@ -6,7 +6,7 @@ namespace Hors.Recognizers
 {
     public class RelativeDayRecognizer : Recognizer
     {
-        internal override string GetRegexPattern()
+        protected override string GetRegexPattern()
         {
             return "[2-6]"; // позавчера, вчера, сегодня, завтра, послезавтра
         }
@@ -24,8 +24,7 @@ namespace Hors.Recognizers
             date.FixDownTo(FixPeriod.Day);
             
             // remove and insert
-            RemoveRange(data, match.Index, match.Length);
-            InsertDates(data, match.Index, date);
+            RemoveAndInsert(data, match.Index, match.Length, date);
 
             return true;
         }

@@ -7,7 +7,7 @@ namespace Hors.Recognizers
 {
     public class YearRecognizer : Recognizer
     {
-        internal override string GetRegexPattern()
+        protected override string GetRegexPattern()
         {
             return "(1)Y?|(0)Y"; // [в] 15 году/2017 (году)
         }
@@ -18,9 +18,6 @@ namespace Hors.Recognizers
             int.TryParse(data.Tokens[match.Index], out var n);
             var year = ParserUtils.GetYearFromNumber(n);
 
-            // remove tokens
-            RemoveRange(data, match.Index, match.Length);
-            
             // insert date
             var date = new AbstractPeriod
             {
@@ -28,7 +25,8 @@ namespace Hors.Recognizers
             };
             date.Fix(FixPeriod.Year);
             
-            InsertDates(data, match.Index, date);
+            // remove and insert
+            RemoveAndInsert(data, match.Index, match.Length, date);
 
             return true;
         }

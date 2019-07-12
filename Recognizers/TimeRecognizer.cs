@@ -7,7 +7,7 @@ namespace Hors.Recognizers
 {
     public class TimeRecognizer : Recognizer
     {
-        internal override string GetRegexPattern()
+        protected override string GetRegexPattern()
         {
             return "([rvgd])?([fot])?(Q|H)?(h|(0)(h)?)((0)e?)?([rvgd])?"; // (в/с/до) (половину/четверть) час/9 (часов) (30 (минут)) (утра/дня/вечера/ночи)
         }
@@ -92,14 +92,12 @@ namespace Hors.Recognizers
                     date.Time = new TimeSpan(hours, minutes, 0);
 
                     // remove and insert
-                    RemoveRange(data, match.Index, match.Length);
-                    InsertDates(data, match.Index, date);
+                    RemoveAndInsert(data, match.Index, match.Length, date);
 
                     if (match.Groups[2].Success && match.Groups[2].Value == "t")
                     {
                         // return "to" to correct period parsing
-                        InsertData(data, match.Index, "t", new AbstractPeriod());
-                        data.Dates[match.Index] = null;
+                        InsertSymbol(data, match.Index, "t");
                     }
 
                     return true;
