@@ -8,10 +8,11 @@ namespace Hors.Models
     {
         None = 0,
         Time = 1,
-        Day = 2,
-        Week = 4,
-        Month = 8,
-        Year = 16
+        TimeUncertain = 2,
+        Day = 4,
+        Week = 8,
+        Month = 16,
+        Year = 32
     }
 
     public class DatesRawData

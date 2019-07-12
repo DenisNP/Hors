@@ -72,28 +72,11 @@ namespace Hors
                 AbstractPeriod.CollapseTwo(fromDate, toDateCopy);
                 AbstractPeriod.CollapseTwo(toDate, fromDateCopy);
 
-                // correct time if needed
-                if (fromDate.TimeUncertain != toDate.TimeUncertain)
-                {
-                    if (fromDate.TimeUncertain)
-                    {
-                        fromDate.Date += new TimeSpan(12, 0,0);
-                        fromDate.Time += new TimeSpan(12, 0,0);
-                        fromDate.TimeUncertain = false;
-                    }
-                    else
-                    {
-                        toDate.Date += new TimeSpan(12, 0,0);
-                        toDate.Time += new TimeSpan(12, 0,0);
-                        toDate.TimeUncertain = false;
-                    }
-                }
-
-                // finela dates
+                // final dates
                 var fromToken = ConvertToToken(fromDate, userDate);
                 var toToken = ConvertToToken(toDate, userDate);
                 var dateTo = toToken.DateTo;
-                var resolution = toDate.MaxFixed();
+                // var resolution = toDate.MaxFixed();
                 
                 // correct period if end less than start
                 /*while (dateTo < fromToken.DateFrom)
@@ -160,12 +143,13 @@ namespace Hors
                 case FixPeriod.Day:
                     datePeriod.Date = AbstractPeriod.TakeDayOfWeekFrom(userDate, datePeriod.Date);
                     break;
+                case FixPeriod.TimeUncertain:
                 case FixPeriod.Time:
                     datePeriod.Date = userDate;
                     break;
             }
 
-            if (datePeriod.IsFixed(FixPeriod.Time))
+            if (datePeriod.IsFixed(FixPeriod.Time) || datePeriod.IsFixed(FixPeriod.TimeUncertain))
             {
                 datePeriod.Date = new DateTime(
                     datePeriod.Date.Year, 
@@ -237,6 +221,7 @@ namespace Hors
                         token.DateTo = datePeriod.Date 
                                        + new TimeSpan(0, 23, 59, 59, 999);
                         break;
+                    case FixPeriod.TimeUncertain:
                     case FixPeriod.Time:
                         token.Type = DateTimeTokenType.Fixed;
                         token.DateFrom = datePeriod.Date;

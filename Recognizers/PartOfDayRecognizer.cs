@@ -40,7 +40,7 @@ namespace Hors.Recognizers
                     {
                         Time = new TimeSpan(hours, 0, 0)
                     };
-                    date.Fix(FixPeriod.Time);
+                    date.Fix(FixPeriod.TimeUncertain);
                 
                     // remove and insert
                     RemoveRange(data, match.Index, match.Length);

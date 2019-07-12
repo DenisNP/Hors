@@ -7,9 +7,10 @@ namespace Hors.Models
     {
         public DateTime Date;
         public TimeSpan Time;
-        public byte Fixed = 0;
-        public int SpanDirection = 0;
-        public bool TimeUncertain = false;
+        public byte Fixed;
+        public int SpanDirection;
+
+        private static int _maxPeriod = -1;
 
         public void Fix(params FixPeriod[] fixes)
         {
@@ -18,7 +19,7 @@ namespace Hors.Models
 
         public void FixDownTo(FixPeriod period)
         {
-            for (var i = 4; i >= 0; i--)
+            for (var i = GetMaxPeriod(); i >= 0; i--)
             {
                 var toFix = (FixPeriod) Math.Pow(2, i);
                 if (toFix < period)
@@ -28,6 +29,25 @@ namespace Hors.Models
             }
         }
 
+        private static int GetMaxPeriod()
+        {
+            if (_maxPeriod == -1)
+            {
+                var maxVal = 0;
+                foreach (int p in Enum.GetValues(typeof(FixPeriod)))
+                {
+                    if (p > maxVal)
+                    {
+                        maxVal = p;
+                    }
+                }
+
+                _maxPeriod = (int) Math.Log(maxVal, 2);
+            }
+
+            return _maxPeriod;
+        }
+
         public AbstractPeriod CopyOf()
         {
             return new AbstractPeriod
@@ -35,14 +55,13 @@ namespace Hors.Models
                 Date = Date,
                 Time = Time,
                 Fixed = Fixed,
-                SpanDirection = SpanDirection,
-                TimeUncertain = TimeUncertain
+                SpanDirection = SpanDirection
             };
         }
 
         public FixPeriod MinFixed()
         {
-            for (var i = 4; i >= 0; i--)
+            for (var i = GetMaxPeriod(); i >= 0; i--)
             {
                 var p = (FixPeriod) Math.Pow(2, i);
                 if (IsFixed(p))
@@ -54,7 +73,7 @@ namespace Hors.Models
 
         public FixPeriod MaxFixed()
         {
-            for (var i = 0; i <= 4; i++)
+            for (var i = 0; i <= GetMaxPeriod(); i++)
             {
                 var p = (FixPeriod) Math.Pow(2, i);
                 if (IsFixed(p))
@@ -134,8 +153,24 @@ namespace Hors.Models
             // time
             if (!basePeriod.IsFixed(FixPeriod.Time) && coverPeriod.IsFixed(FixPeriod.Time))
             {
+                basePeriod.Fix(FixPeriod.Time);
+                if (!basePeriod.IsFixed(FixPeriod.TimeUncertain))
+                {
+                    basePeriod.Time = coverPeriod.Time;
+                }
+                else
+                {
+                    if (basePeriod.Time.Hours <= 12 && coverPeriod.Time.Hours > 12)
+                    {
+                        basePeriod.Time += new TimeSpan(12, 0, 0);
+                    }
+                }
+            }
+            
+            if (!basePeriod.IsFixed(FixPeriod.TimeUncertain) && coverPeriod.IsFixed(FixPeriod.TimeUncertain))
+            {
                 basePeriod.Time = coverPeriod.Time;
-                basePeriod.FixDownTo(FixPeriod.Time);
+                basePeriod.Fix(FixPeriod.TimeUncertain);
             }
 
             return true;

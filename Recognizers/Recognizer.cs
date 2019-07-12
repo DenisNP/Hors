@@ -47,11 +47,16 @@ namespace Hors.Recognizers
 
         protected void InsertDates(DatesRawData data, int index, params AbstractPeriod[] dates)
         {
+            InsertData(data, index, "@", dates);
+        }
+
+        internal void InsertData(DatesRawData data, int index, string placeholder, params AbstractPeriod[] dates)
+        {
             data.Dates.InsertRange(index, dates);
 
-            var placeholder = Enumerable.Repeat("@", dates.Length).ToList();
-            data.Tokens.InsertRange(index, placeholder);
-            data.Pattern = $"{data.Pattern.Substring(0, index)}{string.Join("", placeholder)}{data.Pattern.Substring(index)}";
+            var placeholders = Enumerable.Repeat(placeholder, dates.Length).ToList();
+            data.Tokens.InsertRange(index, placeholders);
+            data.Pattern = $"{data.Pattern.Substring(0, index)}{string.Join("", placeholders)}{data.Pattern.Substring(index)}";
         }
 
         internal abstract string GetRegexPattern();

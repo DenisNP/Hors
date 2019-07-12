@@ -63,11 +63,9 @@ namespace Hors.Recognizers
                     }
 
                     // create time
-                    var date = new AbstractPeriod
-                    {
-                        TimeUncertain = hours <= 12
-                    };
-                    date.Fix(FixPeriod.Time);
+                    var date = new AbstractPeriod();
+                    date.Fix(FixPeriod.TimeUncertain);
+                    if (hours > 12) date.Fix(FixPeriod.Time);
 
                     // correct time
                     if (hours <= 12 && (match.Groups[9].Success || match.Groups[1].Success))
@@ -88,7 +86,7 @@ namespace Hors.Recognizers
                         }
 
                         if (hours == 24) hours = 0;
-                        date.TimeUncertain = false;
+                        date.Fix(FixPeriod.Time);
                     }
                     
                     date.Time = new TimeSpan(hours, minutes, 0);
@@ -96,6 +94,13 @@ namespace Hors.Recognizers
                     // remove and insert
                     RemoveRange(data, match.Index, match.Length);
                     InsertDates(data, match.Index, date);
+
+                    if (match.Groups[2].Success && match.Groups[2].Value == "t")
+                    {
+                        // return "to" to correct period parsing
+                        InsertData(data, match.Index, "t", new AbstractPeriod());
+                        data.Dates[match.Index] = null;
+                    }
 
                     return true;
                 }
