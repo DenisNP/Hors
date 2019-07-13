@@ -15,7 +15,7 @@ namespace Hors.Recognizers
         protected override bool ParseMatch(DatesRawData data, Match match, DateTime userDate)
         {
             // just year number
-            int.TryParse(data.Tokens[match.Index], out var n);
+            int.TryParse(data.Tokens[match.Index].Value, out var n);
             var year = ParserUtils.GetYearFromNumber(n);
 
             // insert date
@@ -26,7 +26,7 @@ namespace Hors.Recognizers
             date.Fix(FixPeriod.Year);
             
             // remove and insert
-            data.RemoveAndInsert(match.Index, match.Length, date);
+            data.ReplaceTokensByDates(match.Index, match.Length, date);
 
             return true;
         }

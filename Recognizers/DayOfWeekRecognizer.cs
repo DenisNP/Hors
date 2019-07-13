@@ -18,7 +18,7 @@ namespace Hors.Recognizers
             var date = new AbstractPeriod();
             
             // day of week
-            var dayOfWeek = ParserUtils.FindIndex(data.Tokens[match.Groups[2].Index], Keywords.DaysOfWeek()) + 1;
+            var dayOfWeek = ParserUtils.FindIndex(data.Tokens[match.Groups[2].Index].Value, Keywords.DaysOfWeek()) + 1;
             var userDayOfWeek = (int) userDate.DayOfWeek;
             if (userDayOfWeek == 0) userDayOfWeek = 7; // starts from Monday, not Sunday
             var diff = dayOfWeek - userDayOfWeek;
@@ -51,7 +51,7 @@ namespace Hors.Recognizers
             }
             
             // remove and insert
-            data.RemoveAndInsert(match.Index, match.Length, date);
+            data.ReplaceTokensByDates(match.Index, match.Length, date);
 
             return true;
         }

@@ -55,7 +55,7 @@ namespace Hors.Recognizers
                             length--;
                         }
                     }
-                    data.RemoveAndInsert(startIndex, length, date);
+                    data.ReplaceTokensByDates(startIndex, length, date);
 
                     return true;
                 }

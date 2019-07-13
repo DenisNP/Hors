@@ -41,7 +41,7 @@ namespace Hors.Recognizers
                         case "N": // "and", skip it
                             break;
                         case "0": // number, store it
-                            int.TryParse(data.Tokens[tokenIndex], out lastNumber);
+                            int.TryParse(data.Tokens[tokenIndex].Value, out lastNumber);
                             break;
                         case "Y": // year(s)
                             offset = offset.AddYears(direction * lastNumber);
@@ -83,7 +83,7 @@ namespace Hors.Recognizers
                 date.Span = offset - userDate;
                 
                 // remove and insert
-                data.RemoveAndInsert(match.Index, match.Length, date);
+                data.ReplaceTokensByDates(match.Index, match.Length, date);
 
                 return true;
             }

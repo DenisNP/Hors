@@ -20,10 +20,24 @@ namespace Hors.Models
         public DateTime DateFrom;
         public DateTime DateTo;
         public TimeSpan Span;
+        
+        public int StartIndex;
+        public int EndIndex;
 
         public override string ToString()
         {
-            return $"[Type={Type}, DateFrom={DateFrom.ToString(CultureInfo.CurrentCulture)}, DateTo={DateTo.ToString(CultureInfo.CurrentCulture)}, Span={Span.ToString()}]";
+            return $"[Type={Type}, " +
+                   $"DateFrom={DateFrom.ToString(CultureInfo.CurrentCulture)}, " +
+                   $"DateTo={DateTo.ToString(CultureInfo.CurrentCulture)}, " +
+                   $"Span={Span.ToString()}, " +
+                   $"StartIndex={StartIndex}, " +
+                   $"EndIndex={EndIndex}]";
+        }
+
+        public void SetEdges(int start, int end)
+        {
+            StartIndex = start;
+            EndIndex = end;
         }
     }
 

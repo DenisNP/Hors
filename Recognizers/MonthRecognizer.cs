@@ -19,7 +19,7 @@ namespace Hors.Recognizers
             var yearFixed = false;
 
             // parse month
-            var mStr = data.Tokens[match.Index + match.Groups[1].Length];
+            var mStr = data.Tokens[match.Index + match.Groups[1].Length].Value;
             var month = ParserUtils.FindIndex(mStr, Keywords.Months()) + 1;
             if (month == 0) month = userDate.Month;
 
@@ -58,7 +58,7 @@ namespace Hors.Recognizers
             if (yearFixed) date.Fix(FixPeriod.Year);
             
             // remove and insert
-            data.RemoveAndInsert(match.Index, match.Length, date);
+            data.ReplaceTokensByDates(match.Index, match.Length, date);
 
             return true;
         }

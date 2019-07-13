@@ -6,25 +6,6 @@ namespace Hors.Utils
 {
     internal static class ParserUtils
     {
-        internal static void FixZeros(List<string> tokens)
-        {
-            var i = 0;
-            while (i < tokens.Count - 1)
-            {
-                var current = tokens[i];
-
-                if (current == "0" && tokens[i + 1].Length == 1 && int.TryParse(tokens[i + 1], out _))
-                {
-                    // this in zero and number after it, delete zero
-                    tokens.RemoveAt(i);
-                }
-                else
-                {
-                    i++;
-                }
-            }
-        }
-
         internal static int FindIndex(string t, IList<string[]> list)
         {
             for (var i = 0; i < list.Count; i++)

@@ -20,7 +20,7 @@ namespace Hors.Recognizers
             var monthFixed = false;
 
             // parse month
-            var mStr = data.Tokens[match.Index + match.Groups[1].Length];
+            var mStr = data.Tokens[match.Index + match.Groups[1].Length].Value;
             var month = ParserUtils.FindIndex(mStr, Keywords.Months()) + 1;
             if (month == 0) month = userDate.Month; // # instead M
             else monthFixed = true;
@@ -29,14 +29,15 @@ namespace Hors.Recognizers
             for (var i = match.Index; i < match.Index + match.Groups[1].Length; i++)
             {
                 var t = data.Tokens[i];
-                var day = -1;
-                int.TryParse(t, out day);
-                if (day <= 0) continue;
+                int.TryParse(t.Value, out var day);
+                if (day <= 0) day = 1;
                 
                 // current token is number, store it as a day
                 var period = new AbstractPeriod
                 {
-                    Date = new DateTime(userDate.Year, month, ParserUtils.GetDayValidForMonth(userDate.Year, month, day))
+                    Date = new DateTime(userDate.Year, month, ParserUtils.GetDayValidForMonth(userDate.Year, month, day)),
+                    Start = t.Start,
+                    End = t.End
                 };   
                 
                 // fix from week to day, and year/month if it was
@@ -47,15 +48,9 @@ namespace Hors.Recognizers
                 dates.Add(period);
             }
             
-            // remove all scanned tokens
-            data.RemoveRange(match.Index, match.Length);
+            // replace all scanned tokens
+            data.ReplaceTokensByDates(match.Index, match.Length, dates.ToArray());
             
-            // insert new dates
-            if (dates.Count > 0)
-            {
-                data.InsertDates(match.Index, dates.ToArray());
-            }
-
             return true;
         }
     }

@@ -37,14 +37,14 @@ namespace Hors.Recognizers
                 )
             {
                 // hours and minutes
-                var hours = match.Groups[5].Success ? int.Parse(data.Tokens[match.Groups[5].Index]) : 1;
+                var hours = match.Groups[5].Success ? int.Parse(data.Tokens[match.Groups[5].Index].Value) : 1;
                 if (hours >= 0 && hours <= 23)
                 {
                     // try minutes
                     var minutes = 0;
                     if (match.Groups[8].Success)
                     {
-                        var m = int.Parse(data.Tokens[match.Groups[8].Index]);
+                        var m = int.Parse(data.Tokens[match.Groups[8].Index].Value);
                         if (m >= 0 && m <= 59) minutes = m;
                     }
                     else if (match.Groups[3].Success && hours > 0)
@@ -92,8 +92,8 @@ namespace Hors.Recognizers
                     date.Time = new TimeSpan(hours, minutes, 0);
 
                     // remove and insert
-                    var toTime = data.Tokens[match.Index];
-                    data.RemoveAndInsert(match.Index, match.Length, date);
+                    var toTime = data.Tokens[match.Index].Value;
+                    data.ReplaceTokensByDates(match.Index, match.Length, date);
 
                     if (match.Groups[2].Success && match.Groups[2].Value == "t")
                     {

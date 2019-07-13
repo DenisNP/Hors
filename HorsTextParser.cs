@@ -14,21 +14,21 @@ namespace Hors
 
         public HorsParseResult Parse(string text, DateTime userDate)
         {
-            var tokens = Regex.Split(text, "\\s+");
+            var tokens = Regex.Split(text, "[^а-яА-ЯёЁa-zA-Z0-9-]");
             return Parse(tokens, userDate);
         }
 
         public HorsParseResult Parse(IEnumerable<string> tokensList, DateTime userDate)
         {
             var tokens = tokensList.ToList();
-            ParserUtils.FixZeros(tokens);
 
             var data = new DatesRawData
             {
                 Dates = new List<AbstractPeriod>(Enumerable.Repeat<AbstractPeriod>(null, tokens.Count)),
                 Pattern = string.Join("", tokens.Select(ParserExtractors.CreatePatternFromToken)),
-                Tokens = tokens
             };
+            data.CreateTokens(tokens);
+            
             // do work
             _recognizers.ForEach(r => r.ParseTokens(data, userDate));
 
@@ -46,7 +46,7 @@ namespace Hors
                 );
             
             // return result
-            return new HorsParseResult(data.Tokens, finalPeriods);
+            return new HorsParseResult(data.Tokens.Select(t => t.Value).ToList(), finalPeriods);
         }
 
         private bool CreateDatePeriod(Match match, DatesRawData data, DateTime userDate, List<DateTimeToken> finalPeriods)
@@ -111,13 +111,17 @@ namespace Hors
                 var singleDate = data.Dates[match.Groups[6].Index];
                 dateToSave = ConvertToToken(singleDate, userDate);
             }
-            
+
+            // set period start and end indexes in source string
+            dateToSave.SetEdges(data.EdgesByIndex(match.Index).Start, data.EdgesByIndex(match.Index + match.Length - 1).End);
+                
+            // save it to data
             var nextIndex = finalPeriods.Count;
             finalPeriods.Add(dateToSave);
             
             // fix final pattern
             data.Pattern = $"{data.Pattern.Substring(0, match.Index)}${data.Pattern.Substring(match.Index + match.Length)}";
-            data.Tokens[match.Index] = $"{{{nextIndex}}}";
+            data.Tokens[match.Index] = new TextToken($"{{{nextIndex}}}", dateToSave.StartIndex, dateToSave.EndIndex);
             data.Dates[match.Index] = null;
             if (match.Length > 1)
             {
@@ -178,9 +182,12 @@ namespace Hors
             // determine period type and dates
             var token = new DateTimeToken
             {
-                Type = DateTimeTokenType.Fixed
+                Type = DateTimeTokenType.Fixed,
+                StartIndex = datePeriod.Start,
+                EndIndex = datePeriod.End
             };
 
+            // set period dates by resolution
             var maxFixed = datePeriod.MaxFixed();
             switch (maxFixed)
             {
@@ -257,6 +264,13 @@ namespace Hors
                     data.Dates.RemoveAt(currentIndex + 1);
                     data.Tokens.RemoveAt(currentIndex + 1);
                     data.Pattern = data.Pattern.Remove(currentIndex + 1, 1);
+                    
+                    // add next token end index to current date
+                    if (nextDate == null)
+                    {
+                        var nextToken = data.Tokens[currentIndex + 1];
+                        currentDate.End = nextToken.End;
+                    }
                 }
                 else
                 {
@@ -282,7 +296,7 @@ namespace Hors
                 {
                     var prevDateCopy = prevDate.CopyOf();
                     prevDateCopy.Fixed &= (byte)~currentDate.Fixed;
-                    AbstractPeriod.CollapseTwo(currentDate, prevDateCopy);
+                    AbstractPeriod.CollapseTwo(currentDate, prevDateCopy, false);
                 }
 
                 // take from right same way
@@ -290,7 +304,7 @@ namespace Hors
                 {
                     var nextDateCopy = nextDate.CopyOf();
                     nextDateCopy.Fixed &= (byte) ~currentDate.Fixed;
-                    AbstractPeriod.CollapseTwo(currentDate, nextDateCopy);
+                    AbstractPeriod.CollapseTwo(currentDate, nextDateCopy, false);
                 }
             }
 

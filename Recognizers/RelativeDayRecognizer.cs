@@ -24,7 +24,7 @@ namespace Hors.Recognizers
             date.FixDownTo(FixPeriod.Day);
             
             // remove and insert
-            data.RemoveAndInsert(match.Index, match.Length, date);
+            data.ReplaceTokensByDates(match.Index, match.Length, date);
 
             return true;
         }

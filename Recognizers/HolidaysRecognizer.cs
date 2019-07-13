@@ -14,7 +14,7 @@ namespace Hors.Recognizers
 
         protected override bool ParseMatch(DatesRawData data, Match match, DateTime userDate)
         {
-            var token = data.Tokens[match.Index];
+            var token = data.Tokens[match.Index].Value;
             data.RemoveRange(match.Index, 1);
             
             if (Morph.HasLemma(token, Keywords.Holiday[0], Morph.LemmaSearchOptions.OnlySingular))

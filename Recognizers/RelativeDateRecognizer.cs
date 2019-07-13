@@ -50,7 +50,7 @@ namespace Hors.Recognizers
             }
             
             // remove and insert
-            data.RemoveAndInsert(match.Index, match.Length, date);
+            data.ReplaceTokensByDates(match.Index, match.Length, date);
 
             return true;
         }

@@ -3,13 +3,16 @@ using System.Globalization;
 
 namespace Hors.Models
 {
-    public class AbstractPeriod
+    public class AbstractPeriod : IHasEdges
     {
         public DateTime Date;
         public TimeSpan Time;
         public byte Fixed;
         public TimeSpan Span;
         public int SpanDirection;
+
+        public int Start { get; set; }
+        public int End { get; set; }
 
         private static int _maxPeriod = -1;
 
@@ -91,11 +94,12 @@ namespace Hors.Models
 
         public override string ToString()
         {
-            return
-                $"[Date={Date.ToString(CultureInfo.CurrentCulture)}, Time={Time.ToString()}, Fixed={Convert.ToString(Fixed, 2)}]";
+            return $"[Date={Date.ToString(CultureInfo.CurrentCulture)}, " +
+                $"Time={Time.ToString()}, " +
+                $"Fixed={Convert.ToString(Fixed, 2)}]";
         }
 
-        public static bool CollapseTwo(AbstractPeriod basePeriod, AbstractPeriod coverPeriod)
+        public static bool CollapseTwo(AbstractPeriod basePeriod, AbstractPeriod coverPeriod, bool setEdges = true)
         {
             if ((basePeriod.Fixed & coverPeriod.Fixed) != 0) return false;
             if (basePeriod.SpanDirection != coverPeriod.SpanDirection) return false;
@@ -174,6 +178,13 @@ namespace Hors.Models
                 basePeriod.Fix(FixPeriod.TimeUncertain);
             }
 
+            // set tokens edges
+            if (setEdges)
+            {
+                basePeriod.Start = Math.Min(basePeriod.Start, coverPeriod.Start);
+                basePeriod.End = Math.Max(basePeriod.End, coverPeriod.End);
+            }
+
             return true;
         }
         
@@ -185,6 +196,12 @@ namespace Hors.Models
             if (currentDow == 0) currentDow = 7;
 
             return currentDate.AddDays(needDow - currentDow);
+        }
+
+        public void SetEdges(int startIndex, int endIndex)
+        {
+            Start = startIndex;
+            End = endIndex;
         }
     }
 }
