@@ -4,7 +4,7 @@
 конструкции с абсолютным и относительным датой и временем. В том числе временные периоды. [Хорс](https://ru.wikipedia.org/wiki/%D0%A5%D0%BE%D1%80%D1%81) — это славянский бог солнца.
 
 ## Установка
-Через NuGet
+Через [NuGet](https://www.nuget.org/packages/Hors)
 ```bash
 Install-Package Hors -Version 0.9.3
 ```
