@@ -61,8 +61,8 @@ using Hors;
 var hors = new HorsTextParser();
 var result = hors.Parse("26 марта в 11 вечера будет красивый закат", DateTime.Now);
 
-var text = result.Text; // -> "{0} будет красивый закат"
-var date = result.Dates[0].DateFrom; // -> DateTime = 26.03.2019 23:00:00
+var text = result.Text; // -> string: "{0} будет красивый закат"
+var date = result.Dates[0].DateFrom; // DateTime: 26.03.2019 23:00:00
 ```
 
 Метод `Parse` возвращает объект [HorsParseResult](https://github.com/DenisNP/Hors/blob/master/Models/HorsParseResult.cs)
@@ -71,6 +71,7 @@ var date = result.Dates[0].DateFrom; // -> DateTime = 26.03.2019 23:00:00
 Поле | Тип | Описание
 -- | -- | --
 `Text` | _string_ | Исходная строка, где вместо всех распознанных участков даты и времени вставлен токен `{x}`, в котором `x` — номер индекса токена в массиве `Dates`
+`Tokens` | _List\<string\>_ | Тот же самый текст, что и в поле `Text`, но разбитый на токены
 `Dates` | _List\<DateTimeToken\>_ | Список распознанных дат и времён, см. ниже
 
 ### DateTimeToken
