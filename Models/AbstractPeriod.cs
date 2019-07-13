@@ -8,6 +8,7 @@ namespace Hors.Models
         public DateTime Date;
         public TimeSpan Time;
         public byte Fixed;
+        public TimeSpan Span;
         public int SpanDirection;
 
         private static int _maxPeriod = -1;
@@ -55,7 +56,7 @@ namespace Hors.Models
                 Date = Date,
                 Time = Time,
                 Fixed = Fixed,
-                SpanDirection = SpanDirection
+                Span = Span
             };
         }
 
@@ -98,6 +99,12 @@ namespace Hors.Models
         {
             if ((basePeriod.Fixed & coverPeriod.Fixed) != 0) return false;
             if (basePeriod.SpanDirection != coverPeriod.SpanDirection) return false;
+
+            // if span
+            if (basePeriod.SpanDirection != 0 && coverPeriod.SpanDirection != 0)
+            {
+                basePeriod.Span += coverPeriod.Span;
+            }
             
             // take year if it is not here, but is in other date
             if (!basePeriod.IsFixed(FixPeriod.Year) && coverPeriod.IsFixed(FixPeriod.Year))
@@ -123,13 +130,7 @@ namespace Hors.Models
                     basePeriod.Date = TakeDayOfWeekFrom(coverPeriod.Date, basePeriod.Date);
                     basePeriod.FixDownTo(FixPeriod.Week);
                 }
-                else if (coverPeriod.IsFixed(FixPeriod.Day))
-                {
-                    // the day not fixed here, take entire date from p
-                    basePeriod.Date = coverPeriod.Date;
-                    basePeriod.FixDownTo(FixPeriod.Day);
-                }
-                else
+                else if (!coverPeriod.IsFixed(FixPeriod.Day))
                 {
                     // only week here, take it by taking a day
                     basePeriod.Date = new DateTime(basePeriod.Date.Year, basePeriod.Date.Month, coverPeriod.Date.Day);

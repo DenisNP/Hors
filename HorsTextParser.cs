@@ -35,6 +35,7 @@ namespace Hors
             // collapse dates first batch
             Recognizer.ForAllMatches(data.GetPattern, "@(@|[fo]@)+", m => CollapseDates(m, data, userDate));
             Recognizer.ForAllMatches(data.GetPattern, "t@(@|t@)+", m => CollapseDates(m, data, userDate));
+            Recognizer.ForAllMatches(data.GetPattern, "@{2,}", m => TakeFromAdjacent(m, data, userDate));
 
             // find periods
             var finalPeriods = new List<DateTimeToken>();
@@ -180,66 +181,62 @@ namespace Hors
                 Type = DateTimeTokenType.Fixed
             };
 
+            var maxFixed = datePeriod.MaxFixed();
+            switch (maxFixed)
+            {
+                case FixPeriod.Year:
+                    token.Type = DateTimeTokenType.Period;
+                    token.DateFrom = new DateTime(datePeriod.Date.Year, 1, 1);
+                    token.DateTo = new DateTime(
+                        datePeriod.Date.Year,
+                        12,
+                        31,
+                        23,
+                        59,
+                        59, 999
+                    );
+                    break;
+                case FixPeriod.Month:
+                    token.Type = DateTimeTokenType.Period;
+                    token.DateFrom = new DateTime(datePeriod.Date.Year, datePeriod.Date.Month, 1);
+                    token.DateTo = new DateTime(
+                        datePeriod.Date.Year,
+                        datePeriod.Date.Month,
+                        DateTime.DaysInMonth(datePeriod.Date.Year, datePeriod.Date.Month),
+                        23,
+                        59,
+                        59,
+                        999
+                    );
+                    break;
+                case FixPeriod.Week:
+                    var dayOfWeek = (int) datePeriod.Date.DayOfWeek;
+                    if (dayOfWeek == 0) dayOfWeek = 7;
+                    token.Type = DateTimeTokenType.Period;
+                    token.DateFrom = datePeriod.Date.AddDays(1 - dayOfWeek);
+                    token.DateTo = datePeriod.Date.AddDays(7 - dayOfWeek)
+                                   + new TimeSpan(0, 23, 59, 59, 999);
+                    break;
+                case FixPeriod.Day:
+                    token.Type = DateTimeTokenType.Fixed;
+                    token.DateFrom = datePeriod.Date;
+                    token.DateTo = datePeriod.Date
+                                   + new TimeSpan(0, 23, 59, 59, 999);
+                    break;
+                case FixPeriod.TimeUncertain:
+                case FixPeriod.Time:
+                    token.Type = DateTimeTokenType.Fixed;
+                    token.DateFrom = datePeriod.Date;
+                    token.DateTo = datePeriod.Date;
+                    break;
+            }
+
             if (datePeriod.SpanDirection != 0)
             {
-                token.Type = datePeriod.SpanDirection == 1 
-                    ? DateTimeTokenType.SpanForward 
+                token.Type = datePeriod.SpanDirection == 1
+                    ? DateTimeTokenType.SpanForward
                     : DateTimeTokenType.SpanBackward;
-                token.DateFrom = datePeriod.Date;
-                token.DateTo = datePeriod.Date;
-                token.Span = datePeriod.Time;
-            }
-            else
-            {
-                var maxFixed = datePeriod.MaxFixed();
-                switch (maxFixed)
-                {
-                    case FixPeriod.Year:
-                        token.Type = DateTimeTokenType.Period;
-                        token.DateFrom = new DateTime(datePeriod.Date.Year, 1, 1);
-                        token.DateTo = new DateTime(
-                            datePeriod.Date.Year, 
-                            12, 
-                            31, 
-                            23, 
-                            59, 
-                            59, 999
-                            );
-                        break;
-                    case FixPeriod.Month:
-                        token.Type = DateTimeTokenType.Period;
-                        token.DateFrom = new DateTime(datePeriod.Date.Year, datePeriod.Date.Month, 1);
-                        token.DateTo = new DateTime(
-                            datePeriod.Date.Year, 
-                            datePeriod.Date.Month, 
-                            DateTime.DaysInMonth(datePeriod.Date.Year, datePeriod.Date.Month),
-                            23,
-                            59,
-                            59,
-                            999
-                            );
-                        break;
-                    case FixPeriod.Week:
-                        var dayOfWeek = (int) datePeriod.Date.DayOfWeek;
-                        if (dayOfWeek == 0) dayOfWeek = 7;
-                        token.Type = DateTimeTokenType.Period;
-                        token.DateFrom = datePeriod.Date.AddDays(1 - dayOfWeek);
-                        token.DateTo = datePeriod.Date.AddDays(7 - dayOfWeek) 
-                                       + new TimeSpan(0, 23, 59, 59, 999);
-                        break;
-                    case FixPeriod.Day:
-                        token.Type = DateTimeTokenType.Fixed;
-                        token.DateFrom = datePeriod.Date;
-                        token.DateTo = datePeriod.Date 
-                                       + new TimeSpan(0, 23, 59, 59, 999);
-                        break;
-                    case FixPeriod.TimeUncertain:
-                    case FixPeriod.Time:
-                        token.Type = DateTimeTokenType.Fixed;
-                        token.DateFrom = datePeriod.Date;
-                        token.DateTo = datePeriod.Date;
-                        break;
-                }
+                token.Span = datePeriod.Span;
             }
 
             return token;
@@ -269,6 +266,36 @@ namespace Hors
                 seenTokens++;
             }
             return skippedTokens == 0;
+        }
+        
+        private bool TakeFromAdjacent(Match match, DatesRawData data, DateTime userDate)
+        {
+            for (var i = match.Index; i < match.Index + match.Length; i++)
+            {
+                // for current date take unfixed information from left and from right adjacent
+                var prevDate = i > match.Index ? data.Dates[i - 1] : null;
+                var currentDate = data.Dates[i];
+                var nextDate = i < match.Index + match.Length - 1 ? data.Dates[i + 1] : null;
+
+                // take from left only non fixed here
+                if (prevDate != null)
+                {
+                    var prevDateCopy = prevDate.CopyOf();
+                    prevDateCopy.Fixed &= (byte)~currentDate.Fixed;
+                    AbstractPeriod.CollapseTwo(currentDate, prevDateCopy);
+                }
+
+                // take from right same way
+                if (nextDate != null)
+                {
+                    var nextDateCopy = nextDate.CopyOf();
+                    nextDateCopy.Fixed &= (byte) ~currentDate.Fixed;
+                    AbstractPeriod.CollapseTwo(currentDate, nextDateCopy);
+                }
+            }
+
+            // this method doesn't modify tokens or array
+            return false;
         }
 
         private static List<Recognizer> DefaultRecognizers()

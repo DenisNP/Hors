@@ -43,7 +43,19 @@ namespace Hors.Recognizers
                     date.Fix(FixPeriod.TimeUncertain);
                 
                     // remove and insert
-                    data.RemoveAndInsert(match.Index, match.Length, date);
+                    var startIndex = match.Index;
+                    var length = match.Length - 1; // skip date at the beginning or ar the end
+                    if (match.Groups[1].Success)
+                    {
+                        // skip first date
+                        startIndex++;
+                        if (match.Groups[3].Success)
+                        {
+                            // skip both dates at the beginning and at the end
+                            length--;
+                        }
+                    }
+                    data.RemoveAndInsert(startIndex, length, date);
 
                     return true;
                 }

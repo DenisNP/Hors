@@ -45,22 +45,22 @@ namespace Hors.Recognizers
                             break;
                         case "Y": // year(s)
                             offset = offset.AddYears(direction * lastNumber);
-                            date.FixDownTo(FixPeriod.Year);
+                            date.FixDownTo(FixPeriod.Month);
                             lastNumber = 1;
                             break;
                         case "m": // month(s)
                             offset = offset.AddMonths(direction * lastNumber);
-                            date.FixDownTo(FixPeriod.Month);
+                            date.FixDownTo(FixPeriod.Week);
                             lastNumber = 1;
                             break;
                         case "w": // week(s)
                             offset = offset.AddDays(7 * direction * lastNumber);
-                            date.FixDownTo(FixPeriod.Week);
+                            date.FixDownTo(FixPeriod.Day);
                             lastNumber = 1;
                             break;
                         case "d": // day(s)
                             offset = offset.AddDays(direction * lastNumber);
-                            date.FixDownTo(FixPeriod.Day);
+                            date.FixDownTo(FixPeriod.Time);
                             lastNumber = 1;
                             break;
                         case "h": // hour(s)
@@ -78,8 +78,9 @@ namespace Hors.Recognizers
                 });
                 
                 // set date
-                date.Date = offset.DateTime;
-                date.Time = offset.Offset;
+                date.Date = new DateTime(offset.DateTime.Year, offset.DateTime.Month, offset.DateTime.Day);
+                date.Time = new TimeSpan(offset.DateTime.Hour, offset.DateTime.Minute, 0);
+                date.Span = offset - userDate;
                 
                 // remove and insert
                 data.RemoveAndInsert(match.Index, match.Length, date);
