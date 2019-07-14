@@ -15,14 +15,14 @@ Install-Package Hors -Version 0.9.5
 > 26 марта в 11 вечера будет красивый закат.
 >
 > {0} будет красивый закат.
-> [Type=Fixed, DateFrom=26.03.2019 23:00:00, DateTo=26.03.2019 23:00:00, Span=00:00:00, StartIndex=0, EndIndex=20]
+> [Type=Fixed, DateFrom=26.03.2019 23:00:00, DateTo=26.03.2019 23:00:00, StartIndex=0, EndIndex=20]
 ```
 ```bash
 > Будет ли в сентябре 25 и 26 числа поход?
 >
 > Будет ли {0} {1} поход?
-> [Type=Fixed, DateFrom=25.09.2019 0:00:00, DateTo=25.09.2019 23:59:59, Span=00:00:00, StartIndex=9, EndIndex=33]
-> [Type=Fixed, DateFrom=26.09.2019 0:00:00, DateTo=26.09.2019 23:59:59, Span=00:00:00, StartIndex=9, EndIndex=33]
+> [Type=Fixed, DateFrom=25.09.2019 0:00:00, DateTo=25.09.2019 23:59:59, StartIndex=9, EndIndex=33]
+> [Type=Fixed, DateFrom=26.09.2019 0:00:00, DateTo=26.09.2019 23:59:59, StartIndex=9, EndIndex=33]
 ```
 ```bash
 > Я был в гостях неделю 2 дня и час назад.
@@ -34,20 +34,20 @@ Install-Package Hors -Version 0.9.5
 > В следующий четверг с 9 утра до 6 вечера важный экзамен!
 >
 > {0} важный экзамен!
-> [Type=Period, DateFrom=18.07.2019 9:00:00, DateTo=18.07.2019 18:00:00, Span=00:00:00, StartIndex=0, EndIndex=40]
+> [Type=Period, DateFrom=18.07.2019 9:00:00, DateTo=18.07.2019 18:00:00, StartIndex=0, EndIndex=40]
 ```
 ```bash
 > Я был на даче в прошлые выходные
 >
 > Я был на даче {0}
-> [Type=Period, DateFrom=06.07.2019 0:00:00, DateTo=07.07.2019 23:59:59, Span=00:00:00, StartIndex=14, EndIndex=32]
+> [Type=Period, DateFrom=06.07.2019 0:00:00, DateTo=07.07.2019 23:59:59, StartIndex=14, EndIndex=32]
 ```
 ```bash
 > Позавчера в 6:30 состоялось совещание, а завтра днём будет хорошая погода.
 >
 > {0} состоялось совещание, а {1} будет хорошая погода.
-> [Type=Fixed, DateFrom=12.07.2019 6:30:00, DateTo=12.07.2019 6:30:00, Span=00:00:00, StartIndex=0, EndIndex=16]
-> [Type=Fixed, DateFrom=15.07.2019 12:00:00, DateTo=15.07.2019 12:00:00, Span=00:00:00, StartIndex=41, EndIndex=52]
+> [Type=Fixed, DateFrom=12.07.2019 6:30:00, DateTo=12.07.2019 6:30:00, StartIndex=0, EndIndex=16]
+> [Type=Fixed, DateFrom=15.07.2019 12:00:00, DateTo=15.07.2019 12:00:00, StartIndex=41, EndIndex=52]
 ```
 
 ## Использование
