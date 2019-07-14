@@ -15,7 +15,7 @@ Install-Package Hors -Version 0.9.5
 > 26 марта в 11 вечера будет красивый закат.
 >
 > {0} будет красивый закат.
-> [Type=Fixed, DateFrom=26.03.2019 23:00:00, DateTo=26.03.2019 23:00:00, StartIndex=0, EndIndex=20]
+> [Type=Fixed, DateFrom=26.03.2019 23:00:00, StartIndex=0, EndIndex=20]
 ```
 ```bash
 > Будет ли в сентябре 25 и 26 числа поход?
@@ -28,7 +28,7 @@ Install-Package Hors -Version 0.9.5
 > Я был в гостях неделю 2 дня и час назад.
 >
 > Я был в гостях {0}.
-> [Type=SpanBackward, DateFrom=05.07.2019 3:40:00, DateTo=05.07.2019 3:40:00, Span=-9.01:00:00, StartIndex=15, EndIndex=39]
+> [Type=SpanBackward, DateFrom=05.07.2019 3:40:00, Span=-9.01:00:00, StartIndex=15, EndIndex=39]
 ```
 ```bash
 > В следующий четверг с 9 утра до 6 вечера важный экзамен!
@@ -46,8 +46,8 @@ Install-Package Hors -Version 0.9.5
 > Позавчера в 6:30 состоялось совещание, а завтра днём будет хорошая погода.
 >
 > {0} состоялось совещание, а {1} будет хорошая погода.
-> [Type=Fixed, DateFrom=12.07.2019 6:30:00, DateTo=12.07.2019 6:30:00, StartIndex=0, EndIndex=16]
-> [Type=Fixed, DateFrom=15.07.2019 12:00:00, DateTo=15.07.2019 12:00:00, StartIndex=41, EndIndex=52]
+> [Type=Fixed, DateFrom=12.07.2019 6:30:00, StartIndex=0, EndIndex=16]
+> [Type=Fixed, DateFrom=15.07.2019 12:00:00, StartIndex=41, EndIndex=52]
 ```
 
 ## Использование
