@@ -14,7 +14,7 @@ namespace Hors.Models
         Year = 32
     }
 
-    public struct DateTimeToken
+    public class DateTimeToken
     {
         public DateTimeTokenType Type;
         public DateTime DateFrom;
@@ -38,6 +38,12 @@ namespace Hors.Models
         {
             StartIndex = start;
             EndIndex = end;
+        }
+
+        public bool OvelappingWith(DateTimeToken other)
+        {
+            return StartIndex >= other.StartIndex && StartIndex <= other.EndIndex
+                   || EndIndex >= other.StartIndex && EndIndex <= other.EndIndex;
         }
     }
 

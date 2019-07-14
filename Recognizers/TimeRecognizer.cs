@@ -92,13 +92,13 @@ namespace Hors.Recognizers
                     date.Time = new TimeSpan(hours, minutes, 0);
 
                     // remove and insert
-                    var toTime = data.Tokens[match.Index].Value;
+                    var toTime = data.Tokens[match.Index];
                     data.ReplaceTokensByDates(match.Index, match.Length, date);
 
                     if (match.Groups[2].Success && match.Groups[2].Value == "t")
                     {
                         // return "to" to correct period parsing
-                        data.InsertNonDate(match.Index, "t", toTime);
+                        data.ReturnTokens(match.Index, "t", toTime);
                     }
 
                     return true;

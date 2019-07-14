@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Text.RegularExpressions;
 using Hors.Dict;
 using Hors.Models;
@@ -14,18 +15,26 @@ namespace Hors.Recognizers
 
         protected override bool ParseMatch(DatesRawData data, Match match, DateTime userDate)
         {
-            var token = data.Tokens[match.Index].Value;
+            var token = data.Tokens[match.Index];
             data.RemoveRange(match.Index, 1);
             
-            if (Morph.HasLemma(token, Keywords.Holiday[0], Morph.LemmaSearchOptions.OnlySingular))
+            if (Morph.HasLemma(token.Value, Keywords.Holiday[0], Morph.LemmaSearchOptions.OnlySingular))
             {
                 // singular
-                data.InsertNonDate(match.Index, "D", Keywords.Saturday[0]);
+                var saturday = new TextToken(Keywords.Saturday[0])
+                {
+                    Start = token.Start,
+                    End = token.End
+                };
+                data.ReturnTokens(match.Index, "D", saturday);
             }
             else
             {
                 // plural
-                data.InsertNonDate(match.Index, "DtD", Keywords.Saturday[0], Keywords.TimeTo[0], Keywords.Sunday[0]);
+                var holidays = new[] {Keywords.Saturday[0], Keywords.TimeTo[0], Keywords.Sunday[0]}
+                    .Select(k => new TextToken(k, token.Start, token.End))
+                    .ToArray();
+                data.ReturnTokens(match.Index, "DtD", holidays);
             }
 
             return true;

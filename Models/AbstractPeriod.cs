@@ -59,7 +59,10 @@ namespace Hors.Models
                 Date = Date,
                 Time = Time,
                 Fixed = Fixed,
-                Span = Span
+                Span = Span,
+                SpanDirection = SpanDirection,
+                Start = Start,
+                End = End
             };
         }
 
@@ -99,7 +102,7 @@ namespace Hors.Models
                 $"Fixed={Convert.ToString(Fixed, 2)}]";
         }
 
-        public static bool CollapseTwo(AbstractPeriod basePeriod, AbstractPeriod coverPeriod, bool setEdges = true)
+        public static bool CollapseTwo(AbstractPeriod basePeriod, AbstractPeriod coverPeriod)
         {
             if ((basePeriod.Fixed & coverPeriod.Fixed) != 0) return false;
             if (basePeriod.SpanDirection != coverPeriod.SpanDirection) return false;
@@ -179,11 +182,8 @@ namespace Hors.Models
             }
 
             // set tokens edges
-            if (setEdges)
-            {
-                basePeriod.Start = Math.Min(basePeriod.Start, coverPeriod.Start);
-                basePeriod.End = Math.Max(basePeriod.End, coverPeriod.End);
-            }
+            basePeriod.Start = Math.Min(basePeriod.Start, coverPeriod.Start);
+            basePeriod.End = Math.Max(basePeriod.End, coverPeriod.End);
 
             return true;
         }

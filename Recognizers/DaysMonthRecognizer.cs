@@ -30,14 +30,16 @@ namespace Hors.Recognizers
             {
                 var t = data.Tokens[i];
                 int.TryParse(t.Value, out var day);
-                if (day <= 0) day = 1;
+                if (day <= 0) continue; // this is "AND" or other token
                 
                 // current token is number, store it as a day
                 var period = new AbstractPeriod
                 {
-                    Date = new DateTime(userDate.Year, month, ParserUtils.GetDayValidForMonth(userDate.Year, month, day)),
-                    Start = t.Start,
-                    End = t.End
+                    Date = new DateTime(
+                        userDate.Year,
+                        month,
+                        ParserUtils.GetDayValidForMonth(userDate.Year, month, day)
+                        )
                 };   
                 
                 // fix from week to day, and year/month if it was

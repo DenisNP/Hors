@@ -15,10 +15,10 @@ namespace Hors
         public HorsParseResult Parse(string text, DateTime userDate)
         {
             var tokens = Regex.Split(text, "[^а-яА-ЯёЁa-zA-Z0-9-]");
-            return Parse(tokens, userDate);
+            return Parse(tokens, userDate, text);
         }
 
-        public HorsParseResult Parse(IEnumerable<string> tokensList, DateTime userDate)
+        public HorsParseResult Parse(IEnumerable<string> tokensList, DateTime userDate, string sourceText = null)
         {
             var tokens = tokensList.ToList();
 
@@ -40,13 +40,17 @@ namespace Hors
             // find periods
             var finalPeriods = new List<DateTimeToken>();
             Recognizer.ForAllMatches(
-                data.GetPattern, 
-                "(([fo]?(@)t(@))|([fo]?(@)))", 
+                data.GetPattern,
+                "(([fo]?(@)t(@))|([fo]?(@)))",
                 m => CreateDatePeriod(m, data, userDate, finalPeriods)
                 );
             
+            // if any dates overlap in source string, stretch them
+            FixOverlap(finalPeriods);
+            
             // return result
-            return new HorsParseResult(data.Tokens.Select(t => t.Value).ToList(), finalPeriods);
+            var srcText = sourceText ?? string.Join(" ", tokens);
+            return new HorsParseResult(srcText, data.Tokens.Select(t => t.Value).ToList(), finalPeriods);
         }
 
         private bool CreateDatePeriod(Match match, DatesRawData data, DateTime userDate, List<DateTimeToken> finalPeriods)
@@ -113,16 +117,30 @@ namespace Hors
             }
 
             // set period start and end indexes in source string
-            dateToSave.SetEdges(data.EdgesByIndex(match.Index).Start, data.EdgesByIndex(match.Index + match.Length - 1).End);
+            dateToSave.SetEdges(
+                data.EdgesByIndex(match.Index).Start,
+                data.EdgesByIndex(match.Index + match.Length - 1).End
+                );
                 
             // save it to data
             var nextIndex = finalPeriods.Count;
             finalPeriods.Add(dateToSave);
             
             // fix final pattern
-            data.Pattern = $"{data.Pattern.Substring(0, match.Index)}${data.Pattern.Substring(match.Index + match.Length)}";
-            data.Tokens[match.Index] = new TextToken($"{{{nextIndex}}}", dateToSave.StartIndex, dateToSave.EndIndex);
+            data.Pattern = $"{data.Pattern.Substring(0, match.Index)}" +
+                           (match.Index + match.Length < data.Pattern.Length 
+                               ? $"${data.Pattern.Substring(match.Index + match.Length)}" 
+                               : ""
+                           );
+            
+            data.Tokens[match.Index] = new TextToken(
+                $"{{{nextIndex}}}",
+                dateToSave.StartIndex,
+                dateToSave.EndIndex
+                );
+            
             data.Dates[match.Index] = null;
+            
             if (match.Length > 1)
             {
                 data.Tokens.RemoveRange(match.Index + 1, match.Length - 1);
@@ -296,15 +314,15 @@ namespace Hors
                 {
                     var prevDateCopy = prevDate.CopyOf();
                     prevDateCopy.Fixed &= (byte)~currentDate.Fixed;
-                    AbstractPeriod.CollapseTwo(currentDate, prevDateCopy, false);
+                    AbstractPeriod.CollapseTwo(currentDate, prevDateCopy);
                 }
 
                 // take from right same way
                 if (nextDate != null)
                 {
                     var nextDateCopy = nextDate.CopyOf();
-                    nextDateCopy.Fixed &= (byte) ~currentDate.Fixed;
-                    AbstractPeriod.CollapseTwo(currentDate, nextDateCopy, false);
+                    nextDateCopy.Fixed &= (byte)~currentDate.Fixed;
+                    AbstractPeriod.CollapseTwo(currentDate, nextDateCopy);
                 }
             }
 
@@ -343,6 +361,29 @@ namespace Hors
         public void RemoveRecognizers(params Type[] typesToRemove)
         {
             _recognizers.RemoveAll(r => typesToRemove.Any(t => t == r.GetType()));
+        }
+
+        private void FixOverlap(List<DateTimeToken> finalPeriods)
+        {
+            var skippedDates = new HashSet<DateTimeToken>();
+            foreach (var period in finalPeriods)
+            {
+                if (!skippedDates.Contains(period))
+                {
+                    var overlapPeriods = finalPeriods
+                        .Where(p => p.OvelappingWith(period) && !skippedDates.Contains(p))
+                        .ToList();
+                    var minIndex = overlapPeriods.Select(p => p.StartIndex).Min();
+                    var maxIndex = overlapPeriods.Select(p => p.EndIndex).Max();
+
+                    foreach (var p in overlapPeriods)
+                    {
+                        p.StartIndex = minIndex;
+                        p.EndIndex = maxIndex;
+                        skippedDates.Add(p);
+                    }
+                }
+            }
         }
     }
 }

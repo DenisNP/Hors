@@ -42,13 +42,13 @@ namespace Hors.Models
             InsertDates(start, dates);
         }
 
-        public void InsertNonDate(int index, string pattern, params string[] tokens)
+        public void ReturnTokens(int index, string pattern, params TextToken[] tokens)
         {
             Dates.InsertRange(index, Enumerable.Repeat<AbstractPeriod>(null, tokens.Length));
-            Tokens.InsertRange(index, tokens.Select(t => new TextToken(t)));
+            Tokens.InsertRange(index, tokens);
             
             var prefix = Pattern.Substring(0, index);
-            var suffix = Pattern.Substring(index);
+            var suffix = index < Pattern.Length ? Pattern.Substring(index) : "";
             
             Pattern = $"{prefix}{pattern}{suffix}";
         }
@@ -60,7 +60,7 @@ namespace Hors.Models
 
             var prefix = Pattern.Substring(0, index);
             var patterns = string.Join("", Enumerable.Repeat(pattern, dates.Length));
-            var suffix = Pattern.Substring(index);
+            var suffix = index < Pattern.Length ? Pattern.Substring(index) : "";
             
             Pattern = $"{prefix}{patterns}{suffix}";
         }

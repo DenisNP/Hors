@@ -5,23 +5,53 @@ namespace Hors.Models
 {
     public class HorsParseResult
     {
-        private readonly List<string> _tokens;
-        public List<string> Tokens => _tokens;
-        
-        public string Text => string.Join(" ", _tokens);
-        
-        private readonly List<DateTimeToken> _dates;
-        public List<DateTimeToken> Dates => _dates;
+        public string SourceText { get; }
+        public List<string> Tokens { get; }
+        public List<DateTimeToken> Dates { get; }
+        public string Text { get; }
 
-        public HorsParseResult(List<string> tokens, List<DateTimeToken> dates)
+        public HorsParseResult(string sourceText, List<string> tokens, List<DateTimeToken> dates)
         {
-            _tokens = tokens;
-            _dates = dates;
+            SourceText = sourceText;
+            Tokens = tokens;
+            Dates = dates;
+            Text = CreateText();
         }
+
+        private string CreateText()
+        {
+            var text = SourceText;
+            var skippedDates = new HashSet<DateTimeToken>();
+            
+            // loop dates from last to first
+            for (var i = Dates.Count - 1; i >= 0; i--)
+            {
+                var date = Dates[i];
+                if (skippedDates.Contains(date)) continue;
+                
+                var sameDates = Dates.Where(d => d.StartIndex == date.StartIndex && !skippedDates.Contains(d)).ToList();
+                var tokensToInsert = new List<string>();
+                
+                foreach (var oDate in sameDates)
+                {
+                    skippedDates.Add(oDate);
+                    var indexInList = Dates.IndexOf(oDate);
+                    tokensToInsert.Add($"{{{indexInList}}}");
+                }
+
+                text = text.Substring(0, date.StartIndex)
+                       + string.Join(" ", tokensToInsert)
+                       + (date.EndIndex < text.Length ? text.Substring(date.EndIndex) : "");
+            }
+
+            return text;
+        }
+
+        public string CleanText => string.Join(" ", Tokens);
 
         public override string ToString()
         {
-            return $"{Text} | {string.Join("; ", Dates.Select(d => d.ToString()))}";
+            return $"{CleanText} | {string.Join("; ", Dates.Select(d => d.ToString()))}";
         }
     }
 }
