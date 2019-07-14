@@ -60,7 +60,7 @@ namespace Hors.Recognizers
                             break;
                         case "d": // day(s)
                             offset = offset.AddDays(direction * lastNumber);
-                            date.FixDownTo(FixPeriod.Time);
+                            date.FixDownTo(FixPeriod.Day);
                             lastNumber = 1;
                             break;
                         case "h": // hour(s)
@@ -79,7 +79,8 @@ namespace Hors.Recognizers
                 
                 // set date
                 date.Date = new DateTime(offset.DateTime.Year, offset.DateTime.Month, offset.DateTime.Day);
-                date.Time = new TimeSpan(offset.DateTime.Hour, offset.DateTime.Minute, 0);
+                if (date.IsFixed(FixPeriod.Time)) 
+                    date.Time = new TimeSpan(offset.DateTime.Hour, offset.DateTime.Minute, 0);
                 date.Span = offset - userDate;
                 
                 // remove and insert

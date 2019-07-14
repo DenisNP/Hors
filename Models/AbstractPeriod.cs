@@ -105,12 +105,16 @@ namespace Hors.Models
         public static bool CollapseTwo(AbstractPeriod basePeriod, AbstractPeriod coverPeriod)
         {
             if ((basePeriod.Fixed & coverPeriod.Fixed) != 0) return false;
-            if (basePeriod.SpanDirection != coverPeriod.SpanDirection) return false;
+            if (basePeriod.SpanDirection == -coverPeriod.SpanDirection && basePeriod.SpanDirection != 0) return false;
 
             // if span
-            if (basePeriod.SpanDirection != 0 && coverPeriod.SpanDirection != 0)
+            if (basePeriod.SpanDirection != 0)
             {
-                basePeriod.Span += coverPeriod.Span;
+                if (coverPeriod.SpanDirection != 0)
+                {
+                    // if another date is Span, just add spans together
+                    basePeriod.Span += coverPeriod.Span;
+                }
             }
             
             // take year if it is not here, but is in other date
@@ -159,6 +163,8 @@ namespace Hors.Models
             }
             
             // time
+            var timeGot = false;
+            
             if (!basePeriod.IsFixed(FixPeriod.Time) && coverPeriod.IsFixed(FixPeriod.Time))
             {
                 basePeriod.Fix(FixPeriod.Time);
@@ -173,12 +179,21 @@ namespace Hors.Models
                         basePeriod.Time += new TimeSpan(12, 0, 0);
                     }
                 }
+
+                timeGot = true;
             }
             
             if (!basePeriod.IsFixed(FixPeriod.TimeUncertain) && coverPeriod.IsFixed(FixPeriod.TimeUncertain))
             {
                 basePeriod.Time = coverPeriod.Time;
                 basePeriod.Fix(FixPeriod.TimeUncertain);
+                timeGot = true;
+            }
+
+            // if this date is Span and we just got time from another non-span date, add this time to Span
+            if (timeGot && basePeriod.SpanDirection != 0 && coverPeriod.SpanDirection == 0)
+            {
+                basePeriod.Span += basePeriod.SpanDirection == 1 ? basePeriod.Time : -basePeriod.Time;
             }
 
             // set tokens edges
