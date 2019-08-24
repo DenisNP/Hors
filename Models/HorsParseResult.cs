@@ -10,15 +10,17 @@ namespace Hors.Models
         public List<DateTimeToken> Dates { get; }
         public string Text { get; }
 
+        private string _textWithTokens;
+
         public HorsParseResult(string sourceText, List<string> tokens, List<DateTimeToken> dates)
         {
             SourceText = sourceText;
             Tokens = tokens;
             Dates = dates;
-            Text = CreateText();
+            Text = CreateText(false);
         }
 
-        private string CreateText()
+        private string CreateText(bool insertTokens)
         {
             var text = SourceText;
             var skippedDates = new HashSet<DateTimeToken>();
@@ -40,7 +42,7 @@ namespace Hors.Models
                 }
 
                 text = text.Substring(0, date.StartIndex)
-                       + string.Join(" ", tokensToInsert)
+                       + (insertTokens ? string.Join(" ", tokensToInsert) : "")
                        + (date.EndIndex < text.Length ? text.Substring(date.EndIndex) : "");
             }
 
@@ -48,6 +50,16 @@ namespace Hors.Models
         }
 
         public string CleanText => string.Join(" ", Tokens);
+
+        public string TextWithTokens()
+        {
+            if (_textWithTokens == "")
+            {
+                _textWithTokens = CreateText(true);
+            }
+
+            return _textWithTokens;
+        }
 
         public override string ToString()
         {

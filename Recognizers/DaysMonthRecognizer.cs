@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 using Hors.Dict;
 using Hors.Models;
@@ -48,6 +49,16 @@ namespace Hors.Recognizers
                 
                 // store
                 dates.Add(period);
+                
+                // compare with last if month not fixed
+                if (!monthFixed && dates.Count > 0 && dates.Last().Date < period.Date)
+                {
+                    period.Date = new DateTime(
+                        userDate.Year,
+                        month + 1,
+                        ParserUtils.GetDayValidForMonth(userDate.Year, month + 1, day)
+                    );
+                }
             }
             
             // replace all scanned tokens
