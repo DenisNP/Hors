@@ -3,7 +3,7 @@
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <PackageVersion>0.9.6</PackageVersion>
+        <PackageVersion>0.9.7</PackageVersion>
         <Title>Hors</Title>
         <Authors>Denis Peshekhonov</Authors>
         <Description>Natural language processing of dates and times in Russian</Description>
