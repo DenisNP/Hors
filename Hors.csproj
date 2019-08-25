@@ -18,6 +18,12 @@
     <ItemGroup>
       <None Remove="Dict\time_words.txt" />
       <EmbeddedResource Include="Dict\time_words.txt" />
+      <EmbeddedResource Remove="Hors.Tests\**" />
+      <None Remove="Hors.Tests\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Remove="Hors.Tests\**" />
     </ItemGroup>
 
 </Project>
