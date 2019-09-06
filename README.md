@@ -6,7 +6,7 @@
 ## Установка
 Через [NuGet](https://www.nuget.org/packages/Hors)
 ```bash
-Install-Package Hors -Version 0.9.8
+Install-Package Hors -Version 0.9.9
 ```
 
 ## Примеры работы
