@@ -16,8 +16,7 @@ namespace Hors.Tests
         public void TestHolidays()
         {
             var parser = new HorsTextParser();
-            var result = parser.Parse("в эти выходные еду на дачу", new DateTime(2019, 9, 2));
-            
+            var result = parser.Parse("в эти выходные, еду на дачу!", new DateTime(2019, 9, 2));
             Assert.AreEqual(1, result.Dates.Count);
             var date = result.Dates.First();
 

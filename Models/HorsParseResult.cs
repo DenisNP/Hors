@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Hors.Utils;
 
 namespace Hors.Models
 {
@@ -17,7 +18,7 @@ namespace Hors.Models
             SourceText = sourceText;
             Tokens = tokens;
             Dates = dates;
-            Text = CreateText(false);
+            Text = Helpers.TrimPunctuation(CreateText(false)).Trim();
         }
 
         private string CreateText(bool insertTokens)
@@ -49,21 +50,24 @@ namespace Hors.Models
             return text;
         }
 
-        public string CleanText => string.Join(" ", Tokens);
+        public string CleanTextWithTokens => string.Join(" ", Tokens);
 
-        public string TextWithTokens()
+        public string TextWithTokens
         {
-            if (_textWithTokens == "")
+            get
             {
-                _textWithTokens = CreateText(true);
-            }
+                if (string.IsNullOrEmpty(_textWithTokens))
+                {
+                    _textWithTokens = CreateText(true);
+                }
 
-            return _textWithTokens;
+                return _textWithTokens;
+            }
         }
 
         public override string ToString()
         {
-            return $"{CleanText} | {string.Join("; ", Dates.Select(d => d.ToString()))}";
+            return $"{CleanTextWithTokens} | {string.Join("; ", Dates.Select(d => d.ToString()))}";
         }
     }
 }
