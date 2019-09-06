@@ -11,12 +11,27 @@ namespace Hors.Tests
         public void Setup()
         {
         }
+        
+        [Test]
+        public void TestDaysOfWeek()
+        {
+            var parser = new HorsTextParser();
+            var result = parser.Parse("во вторник встреча с заказчиком", new DateTime(2019, 9, 6));
+            
+            Assert.AreEqual(1, result.Dates.Count);
+            var date = result.Dates.First();
+
+            Assert.AreEqual(DateTimeTokenType.Period, date.Type);
+            //Assert.AreEqual(7, date.DateFrom.Day);
+            //Assert.AreEqual(8, date.DateTo.Day);
+        }
 
         [Test]
         public void TestHolidays()
         {
             var parser = new HorsTextParser();
-            var result = parser.Parse("в эти выходные, еду на дачу!", new DateTime(2019, 9, 2));
+            var result = parser.Parse("в эти выходные еду на дачу", new DateTime(2019, 9, 2));
+            
             Assert.AreEqual(1, result.Dates.Count);
             var date = result.Dates.First();
 
