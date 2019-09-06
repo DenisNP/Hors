@@ -11,6 +11,33 @@ namespace Hors.Tests
         public void Setup()
         {
         }
+
+        [Test]
+        public void TestDatesPeriod()
+        {
+            var parser = new HorsTextParser();
+            var strings = new[]
+            {
+                "с 11 по 15 сентября будет командировка",
+                "11 по 15 сентября будет командировка",
+                "с 11 до 15 сентября будет командировка",
+                "с 11 до 15 числа будет командировка"
+            };
+            
+            foreach (var str in strings)
+            {
+                var result = parser.Parse(str, new DateTime(2019, 9, 6));
+            
+                Assert.AreEqual(1, result.Dates.Count);
+                var date = result.Dates.First();
+            
+                Assert.AreEqual(DateTimeTokenType.Period, date.Type);
+                Assert.AreEqual(11, date.DateFrom.Day);
+                Assert.AreEqual(15, date.DateTo.Day);
+                Assert.AreEqual(9, date.DateFrom.Month);
+                Assert.AreEqual(9, date.DateTo.Month);
+            }
+        }
         
         [Test]
         public void TestDaysOfWeek()

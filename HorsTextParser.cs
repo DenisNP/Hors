@@ -346,6 +346,7 @@ namespace Hors
             return new List<Recognizer>
             {
                 new HolidaysRecognizer(),
+                new DatesPeriodRecognizer(),
                 new DaysMonthRecognizer(),
                 new MonthRecognizer(),
                 new RelativeDayRecognizer(),

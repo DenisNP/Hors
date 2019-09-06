@@ -12,7 +12,7 @@ namespace Hors.Recognizers
     {
         protected override string GetRegexPattern()
         {
-            return "((0N?)+)(M|#)"; // 26 и 27 января/числа (2017 (года)/17 года)
+            return "((0N?)+)(M|#)"; // 24, 25, 26... и 27 января/числа
         }
 
         protected override bool ParseMatch(DatesRawData data, Match match, DateTime userDate)
