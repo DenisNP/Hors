@@ -21,9 +21,8 @@ namespace Hors.Tests
             Assert.AreEqual(1, result.Dates.Count);
             var date = result.Dates.First();
 
-            Assert.AreEqual(DateTimeTokenType.Period, date.Type);
-            //Assert.AreEqual(7, date.DateFrom.Day);
-            //Assert.AreEqual(8, date.DateTo.Day);
+            Assert.AreEqual(DateTimeTokenType.Fixed, date.Type);
+            Assert.AreEqual(10, date.DateFrom.Day);
         }
 
         [Test]
