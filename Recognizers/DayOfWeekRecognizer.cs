@@ -45,7 +45,6 @@ namespace Hors.Recognizers
             }
             else
             {
-                if (diff < 0) diff += 7;
                 date.Date = userDate.AddDays(diff);
                 date.Fix(FixPeriod.Day);
             }

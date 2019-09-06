@@ -163,7 +163,18 @@ namespace Hors
                     datePeriod.Date = new DateTime(userDate.Year, datePeriod.Date.Month, datePeriod.Date.Day);
                     break;
                 case FixPeriod.Day:
-                    var newDate = AbstractPeriod.TakeDayOfWeekFrom(userDate, datePeriod.Date);
+                    // day of week fixed, take closest next
+                    var userDow = (int)userDate.DayOfWeek;
+                    if (userDow == 0) userDow = 7;
+                    var dateDow = (int)datePeriod.Date.DayOfWeek;
+                    if (dateDow == 0) dateDow = 7;
+                    var dowDiff = dateDow - userDow;
+                    if (dowDiff <= 0)
+                    {
+                        dowDiff += 7;
+                    }
+
+                    var newDate = userDate.AddDays(dowDiff);
                     datePeriod.Date = new DateTime(newDate.Year, newDate.Month, newDate.Day);
                     break;
                 case FixPeriod.TimeUncertain:
