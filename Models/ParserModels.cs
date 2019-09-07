@@ -16,10 +16,11 @@ namespace Hors.Models
 
     public class DateTimeToken
     {
-        public DateTimeTokenType Type;
-        public DateTime DateFrom;
-        public DateTime DateTo;
-        public TimeSpan Span;
+        public DateTimeTokenType Type { get; set; }
+        public DateTime DateFrom { get; set; }
+        public DateTime DateTo { get; set; }
+        public TimeSpan Span { get; set; }
+        public bool HasTime { get; set; }
         
         public int StartIndex;
         public int EndIndex;
@@ -30,6 +31,7 @@ namespace Hors.Models
                    $"DateFrom={DateFrom.ToString(CultureInfo.CurrentCulture)}, " +
                    $"DateTo={DateTo.ToString(CultureInfo.CurrentCulture)}, " +
                    $"Span={Span.ToString()}, " +
+                   $"HasTime={HasTime}, " +
                    $"StartIndex={StartIndex}, " +
                    $"EndIndex={EndIndex}]";
         }

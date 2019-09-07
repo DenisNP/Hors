@@ -64,10 +64,12 @@ namespace Hors
                 var fromDate = data.Dates[match.Groups[3].Index];
                 var toDate = data.Dates[match.Groups[4].Index];
 
+                // create from-copy with fixed only what not fixed here to collapse
                 var fromDateCopy = fromDate.CopyOf();
                 fromDateCopy.Fixed &= (byte)~toDate.Fixed;
                 fromDateCopy.SpanDirection = 0;
                 
+                // the same for to-copy
                 var toDateCopy = toDate.CopyOf();
                 toDateCopy.Fixed &= (byte)~fromDate.Fixed;
                 toDateCopy.SpanDirection = 0;
@@ -264,6 +266,7 @@ namespace Hors
                     token.Type = DateTimeTokenType.Fixed;
                     token.DateFrom = datePeriod.Date;
                     token.DateTo = datePeriod.Date;
+                    token.HasTime = true;
                     break;
             }
 
