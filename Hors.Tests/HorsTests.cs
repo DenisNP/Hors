@@ -13,6 +13,19 @@ namespace Hors.Tests
         }
 
         [Test]
+        public void TestFixPeriod()
+        {
+            var parser = new HorsTextParser();
+            var result = parser.Parse("на выходных будет хорошо", new DateTime(2019, 9, 7));
+            
+            Assert.AreEqual(1, result.Dates.Count);
+            var date = result.Dates.First();
+            Assert.AreEqual(DateTimeTokenType.Period, date.Type);
+            Assert.AreEqual(14, date.DateFrom.Day);
+            Assert.AreEqual(15, date.DateTo.Day);
+        }
+
+        [Test]
         public void TestDatesPeriod()
         {
             var parser = new HorsTextParser();

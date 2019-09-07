@@ -82,10 +82,10 @@ namespace Hors
                 var fromToken = ConvertToToken(fromDate, userDate);
                 var toToken = ConvertToToken(toDate, userDate);
                 var dateTo = toToken.DateTo;
-                // var resolution = toDate.MaxFixed();
                 
                 // correct period if end less than start
-                /*while (dateTo < fromToken.DateFrom)
+                var resolution = toDate.MaxFixed();
+                while (dateTo < fromToken.DateFrom)
                 {
                     switch (resolution)
                     {
@@ -102,7 +102,7 @@ namespace Hors
                             dateTo = dateTo.AddYears(1);
                             break;
                     }
-                }*/
+                }
 
                 dateToSave = new DateTimeToken
                 {
