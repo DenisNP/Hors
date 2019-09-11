@@ -11,6 +11,19 @@ namespace Hors.Tests
         public void Setup()
         {
         }
+        
+        [Test]
+        public void TestTimeHourOfDay()
+        {
+            var parser = new HorsTextParser();
+            var result = parser.Parse("24 сентября в час дня", new DateTime(2019, 9, 7));
+            
+            Assert.AreEqual(1, result.Dates.Count);
+            var date = result.Dates.First();
+            Assert.AreEqual(DateTimeTokenType.Fixed, date.Type);
+            Assert.AreEqual(true, date.HasTime);
+            Assert.AreEqual(13, date.DateFrom.Hour);
+        }
 
         [Test]
         public void TestFixPeriod()

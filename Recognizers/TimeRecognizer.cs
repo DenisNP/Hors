@@ -29,7 +29,7 @@ namespace Hors.Recognizers
                 && (
                     match.Groups[5].Success // либо число
                     || (
-                        match.Groups[6].Success //  либо без числа, но "час дня/ночи"
+                        match.Groups[4].Success //  либо без числа, но "час дня/ночи"
                         && (match.Groups[9].Success || match.Groups[1].Success)
                         && "dg".Any(t => t.ToString() == match.Groups[9].Value)
                         )
