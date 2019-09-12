@@ -13,6 +13,41 @@ namespace Hors.Tests
         }
         
         [Test]
+        public void TestComplexPeriod()
+        {
+            var parser = new HorsTextParser();
+            var result = parser.Parse("хакатон с 12 часов 18 сентября до 12 часов 20 сентября", new DateTime(2019, 9, 7));
+            
+            Assert.AreEqual(1, result.Dates.Count);
+            var date = result.Dates.First();
+            Assert.AreEqual(DateTimeTokenType.Period, date.Type);
+            Assert.AreEqual(true, date.HasTime);
+            Assert.AreEqual(12, date.DateFrom.Hour);
+            Assert.AreEqual(18, date.DateFrom.Day);
+            Assert.AreEqual(9, date.DateFrom.Month);
+            Assert.AreEqual(12, date.DateTo.Hour);
+            Assert.AreEqual(20, date.DateTo.Day);
+            Assert.AreEqual(9, date.DateTo.Month);
+            Assert.AreEqual(2019, date.DateFrom.Year);
+            Assert.AreEqual(2019, date.DateTo.Year);
+        }
+
+        [Test]
+        public void TestTimeBerofeDay()
+        {
+            var parser = new HorsTextParser();
+            var result = parser.Parse("12 часов 12 сентября будет встреча", new DateTime(2019, 9, 7));
+            
+            Assert.AreEqual(1, result.Dates.Count);
+            var date = result.Dates.First();
+            Assert.AreEqual(DateTimeTokenType.Fixed, date.Type);
+            Assert.AreEqual(true, date.HasTime);
+            Assert.AreEqual(12, date.DateFrom.Hour);
+            Assert.AreEqual(12, date.DateFrom.Day);
+            Assert.AreEqual(9, date.DateFrom.Month);
+        }
+        
+        [Test]
         public void TestTimeHourOfDay()
         {
             var parser = new HorsTextParser();

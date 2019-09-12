@@ -139,27 +139,27 @@ namespace Hors.Models
                 {
                     // set day of week, take date
                     basePeriod.Date = TakeDayOfWeekFrom(coverPeriod.Date, basePeriod.Date);
-                    basePeriod.FixDownTo(FixPeriod.Week);
+                    basePeriod.Fix(FixPeriod.Week);
                 }
                 else if (!coverPeriod.IsFixed(FixPeriod.Day))
                 {
                     // only week here, take it by taking a day
                     basePeriod.Date = new DateTime(basePeriod.Date.Year, basePeriod.Date.Month, coverPeriod.Date.Day);
-                    basePeriod.FixDownTo(FixPeriod.Week);
+                    basePeriod.Fix(FixPeriod.Week);
                 }
             }
             else if (basePeriod.IsFixed(FixPeriod.Week) && coverPeriod.IsFixed(FixPeriod.Day))
             {
                 // here is a week, but day of week in other date
                 basePeriod.Date = TakeDayOfWeekFrom(basePeriod.Date, coverPeriod.Date);
-                basePeriod.FixDownTo(FixPeriod.Day);
+                basePeriod.Fix(FixPeriod.Week, FixPeriod.Day);
             }
             
             // day
             if (!basePeriod.IsFixed(FixPeriod.Day) && coverPeriod.IsFixed(FixPeriod.Day))
             {
                 basePeriod.Date = new DateTime(basePeriod.Date.Year, basePeriod.Date.Month, coverPeriod.Date.Day);
-                basePeriod.FixDownTo(FixPeriod.Day);
+                basePeriod.Fix(FixPeriod.Week, FixPeriod.Day);
             }
             
             // time
