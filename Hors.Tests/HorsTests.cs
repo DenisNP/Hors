@@ -33,7 +33,7 @@ namespace Hors.Tests
         }
 
         [Test]
-        public void TestTimeBerofeDay()
+        public void TestTimeBeforeDay()
         {
             var parser = new HorsTextParser();
             var result = parser.Parse("12 часов 12 сентября будет встреча", new DateTime(2019, 9, 7));

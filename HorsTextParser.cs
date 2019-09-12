@@ -33,10 +33,8 @@ namespace Hors
             _recognizers.ForEach(r => r.ParseTokens(data, userDate));
 
             // collapse dates first batch
-            Console.WriteLine(data);
             Recognizer.ForAllMatches(data.GetPattern, "@(@|[fo]@)+", m => CollapseDates(m, data, userDate));
             Recognizer.ForAllMatches(data.GetPattern, "t@(@|t@)+", m => CollapseDates(m, data, userDate));
-            Console.WriteLine(data);
             Recognizer.ForAllMatches(data.GetPattern, "@{2,}", m => TakeFromAdjacent(m, data, userDate));
 
             // find periods
