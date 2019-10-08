@@ -17,11 +17,12 @@ namespace Hors.Recognizers
             // determine if it is time
             if (
                 (
-                    match.Groups[2].Success // во фразе есть "в/с/до"
+                    /*match.Groups[2].Success // во фразе есть "в/с/до"
                     || (
                         match.Groups[3].Success // во фразе есть "половина/четверть" + число
                         && match.Groups[5].Success
-                        ) 
+                        ) */
+                    match.Groups[5].Success // во фразе есть число
                     || match.Groups[6].Success // во фразе есть "часов"
                     || match.Groups[1].Success // во фразе есть "утра/дня/вечера/ночи"
                     || match.Groups[9].Success

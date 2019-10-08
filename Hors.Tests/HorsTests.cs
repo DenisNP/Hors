@@ -11,6 +11,20 @@ namespace Hors.Tests
         public void Setup()
         {
         }
+
+        [Test]
+        public void TestTimeAfterDay()
+        {
+            var parser = new HorsTextParser();
+            var result = parser.Parse("в четверг 16 0 0 будет событие", new DateTime(2019, 10, 8));
+            
+            Assert.AreEqual(1, result.Dates.Count);
+            var date = result.Dates.First();
+            Assert.AreEqual(DateTimeTokenType.Fixed, date.Type);
+            Assert.AreEqual(true, date.HasTime);
+            Assert.AreEqual(16, date.DateFrom.Hour);
+            Assert.AreEqual(10, date.DateFrom.Day);
+        }
         
         [Test]
         public void TestComplexPeriod()
