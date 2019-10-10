@@ -11,14 +11,15 @@ namespace Hors
     public class HorsTextParser
     {
         private readonly List<Recognizer> _recognizers = DefaultRecognizers();
+        private readonly Random _random = new Random();
 
-        public HorsParseResult Parse(string text, DateTime userDate)
+        public HorsParseResult Parse(string text, DateTime userDate, int collapseDistance = 3)
         {
             var tokens = Regex.Split(text, "[^а-яА-ЯёЁa-zA-Z0-9-]");
-            return Parse(tokens, userDate, text);
+            return Parse(tokens, userDate, text, collapseDistance);
         }
 
-        public HorsParseResult Parse(IEnumerable<string> tokensList, DateTime userDate, string sourceText = null)
+        public HorsParseResult Parse(IEnumerable<string> tokensList, DateTime userDate, string sourceText = null, int collapseDistance = 3)
         {
             var tokens = tokensList.ToList();
 
@@ -35,7 +36,16 @@ namespace Hors
             // collapse dates first batch
             Recognizer.ForAllMatches(data.GetPattern, "@(@|[fo]@)+", m => CollapseDates(m, data, userDate));
             Recognizer.ForAllMatches(data.GetPattern, "t@(@|t@)+", m => CollapseDates(m, data, userDate));
+
+            // take values from neighbours
             Recognizer.ForAllMatches(data.GetPattern, "@{2,}", m => TakeFromAdjacent(m, data, userDate));
+            
+            // collapse closest dates
+            if (collapseDistance > 0)
+            {
+                Recognizer.ForAllMatches(data.GetPattern, "([fo]?(@))_{0," + collapseDistance + "}([fo]?(@))",
+                    m => CollapseClosest(m, data, userDate));
+            }
 
             // find periods
             var finalPeriods = new List<DateTimeToken>();
@@ -123,7 +133,7 @@ namespace Hors
             dateToSave.SetEdges(
                 data.EdgesByIndex(match.Index).Start,
                 data.EdgesByIndex(match.Index + match.Length - 1).End
-                );
+            );
                 
             // save it to data
             var nextIndex = finalPeriods.Count;
@@ -131,16 +141,17 @@ namespace Hors
             
             // fix final pattern
             data.Pattern = $"{data.Pattern.Substring(0, match.Index)}" +
-                           (match.Index + match.Length < data.Pattern.Length 
-                               ? $"${data.Pattern.Substring(match.Index + match.Length)}" 
-                               : ""
+                           (
+                               match.Index + match.Length < data.Pattern.Length
+                                   ? $"${data.Pattern.Substring(match.Index + match.Length)}"
+                                   : ""
                            );
-            
+
             data.Tokens[match.Index] = new TextToken(
                 $"{{{nextIndex}}}",
                 dateToSave.StartIndex,
                 dateToSave.EndIndex
-                );
+            );
             
             data.Dates[match.Index] = null;
             
@@ -218,6 +229,8 @@ namespace Hors
                 StartIndex = datePeriod.Start,
                 EndIndex = datePeriod.End
             };
+            
+            token.SetDuplicateGroup(datePeriod.DuplicateGroup);
 
             // set period dates by resolution
             var maxFixed = datePeriod.MaxFixed();
@@ -313,6 +326,44 @@ namespace Hors
                 seenTokens++;
             }
             return skippedTokens == 0;
+        }
+        
+        private bool CollapseClosest(Match match, DatesRawData data, DateTime userDate)
+        {
+            var firstDate = data.Dates[match.Groups[2].Index];
+            var secondDate = data.Dates[match.Groups[4].Index];
+
+            var firstTimeFixed = firstDate.IsFixed(FixPeriod.TimeUncertain) || firstDate.IsFixed(FixPeriod.Time);
+            var secondTimeFixed = secondDate.IsFixed(FixPeriod.TimeUncertain) || secondDate.IsFixed(FixPeriod.Time);
+
+            if (firstTimeFixed != secondTimeFixed)
+            {
+                var (firstStart, firstEnd, secondStart, secondEnd) 
+                    = (firstDate.Start, firstDate.End, secondDate.Start, secondDate.End);
+                
+                if (secondTimeFixed)
+                {
+                    AbstractPeriod.CollapseTwo(firstDate, secondDate);
+                }
+                else
+                {
+                    AbstractPeriod.CollapseTwo(secondDate, firstDate);
+                }
+
+                var duplicateGroup = _random.Next(int.MaxValue);
+                                    
+                // mark same as
+                secondDate.DuplicateGroup = duplicateGroup;
+                firstDate.DuplicateGroup = duplicateGroup;
+                
+                // return indexes
+                firstDate.Start = firstStart;
+                firstDate.End = firstEnd;
+                secondDate.Start = secondStart;
+                secondDate.End = secondEnd;
+            }
+
+            return false;
         }
         
         private bool TakeFromAdjacent(Match match, DatesRawData data, DateTime userDate)

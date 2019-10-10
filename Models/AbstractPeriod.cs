@@ -14,6 +14,8 @@ namespace Hors.Models
         public int Start { get; set; }
         public int End { get; set; }
 
+        public int DuplicateGroup { get; set; } = -1;
+
         private static int _maxPeriod = -1;
 
         public void Fix(params FixPeriod[] fixes)

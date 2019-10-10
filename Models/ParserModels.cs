@@ -22,8 +22,10 @@ namespace Hors.Models
         public TimeSpan Span { get; set; }
         public bool HasTime { get; set; }
         
-        public int StartIndex;
-        public int EndIndex;
+        public int StartIndex { get; set; }
+        public int EndIndex { get; set; }
+
+        private int _duplicateGroup = -1;
 
         public override string ToString()
         {
@@ -46,6 +48,16 @@ namespace Hors.Models
         {
             return StartIndex >= other.StartIndex && StartIndex <= other.EndIndex
                    || EndIndex >= other.StartIndex && EndIndex <= other.EndIndex;
+        }
+
+        internal void SetDuplicateGroup(int d)
+        {
+            _duplicateGroup = d;
+        }
+
+        internal int GetDuplicateGroup()
+        {
+            return _duplicateGroup;
         }
     }
 

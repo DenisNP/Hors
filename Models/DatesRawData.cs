@@ -87,9 +87,8 @@ namespace Hors.Models
             Tokens = new List<TextToken>();
             
             var len = 0;
-            for (var i = 0; i < tokens.Count; i++)
+            foreach (var currentToken in tokens)
             {
-                var currentToken = tokens[i];
                 var token = new TextToken(currentToken)
                 {
                     Start = len,

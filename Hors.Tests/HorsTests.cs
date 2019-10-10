@@ -11,6 +11,33 @@ namespace Hors.Tests
         public void Setup()
         {
         }
+        
+        [Test]
+        public void TestCollapseDistance()
+        {
+            var parser = new HorsTextParser();
+            var result = parser.Parse("в четверг будет событие в 16 0 0", new DateTime(2019, 10, 8), 3);
+            
+            Assert.AreEqual(1, result.Dates.Count);
+            Console.WriteLine(result.Text);
+            Assert.AreEqual("будет событие", result.Text.Trim());
+            var date = result.Dates.First();
+            Assert.AreEqual(DateTimeTokenType.Fixed, date.Type);
+            Assert.AreEqual(true, date.HasTime);
+            Assert.AreEqual(16, date.DateFrom.Hour);
+            Assert.AreEqual(10, date.DateFrom.Day);
+            
+            result = parser.Parse("в четверг будет хорошее событие в 16 0 0", new DateTime(2019, 10, 8), 2);
+            
+            Assert.AreEqual(2, result.Dates.Count);
+            var dateFirst = result.Dates.First();
+            var dateLast = result.Dates.Last();
+            Assert.AreEqual(DateTimeTokenType.Fixed, dateFirst.Type);
+            Assert.AreEqual(false, dateFirst.HasTime);
+            Assert.AreEqual(true, dateLast.HasTime);
+            Assert.AreEqual(16, dateLast.DateFrom.Hour);
+            Assert.AreEqual(10, dateFirst.DateFrom.Day);
+        }
 
         [Test]
         public void TestTimeAfterDay()
