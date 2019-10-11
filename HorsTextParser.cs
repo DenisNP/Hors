@@ -13,7 +13,7 @@ namespace Hors
         private readonly List<Recognizer> _recognizers = DefaultRecognizers();
         private readonly Random _random = new Random();
 
-        public HorsParseResult Parse(string text, DateTime userDate, int collapseDistance = 3)
+        public HorsParseResult Parse(string text, DateTime userDate, int collapseDistance = 4)
         {
             var tokens = Regex.Split(text, "[^а-яА-ЯёЁa-zA-Z0-9-]");
             return Parse(tokens, userDate, text, collapseDistance);
@@ -43,8 +43,9 @@ namespace Hors
             // collapse closest dates
             if (collapseDistance > 0)
             {
-                Recognizer.ForAllMatches(data.GetPattern, "([fo]?(@))_{0," + collapseDistance + "}([fo]?(@))",
-                    m => CollapseClosest(m, data, userDate));
+                var pattern = "(@)[^@]{1," + collapseDistance + "}(?=(@))";
+                Recognizer.ForAllMatches(data.GetPattern, pattern,
+                    m => CollapseClosest(m, data, userDate), true);
             }
 
             // find periods
@@ -330,18 +331,15 @@ namespace Hors
         
         private bool CollapseClosest(Match match, DatesRawData data, DateTime userDate)
         {
-            var firstDate = data.Dates[match.Groups[2].Index];
-            var secondDate = data.Dates[match.Groups[4].Index];
+            var firstDate = data.Dates[match.Groups[1].Index];
+            var secondDate = data.Dates[match.Groups[2].Index];
 
-            var firstTimeFixed = firstDate.IsFixed(FixPeriod.TimeUncertain) || firstDate.IsFixed(FixPeriod.Time);
-            var secondTimeFixed = secondDate.IsFixed(FixPeriod.TimeUncertain) || secondDate.IsFixed(FixPeriod.Time);
-
-            if (firstTimeFixed != secondTimeFixed)
+            if ((firstDate.Fixed & secondDate.Fixed) == 0)
             {
                 var (firstStart, firstEnd, secondStart, secondEnd) 
                     = (firstDate.Start, firstDate.End, secondDate.Start, secondDate.End);
                 
-                if (secondTimeFixed)
+                if (firstDate.MinFixed() > secondDate.MinFixed())
                 {
                     AbstractPeriod.CollapseTwo(firstDate, secondDate);
                 }
@@ -350,8 +348,20 @@ namespace Hors
                     AbstractPeriod.CollapseTwo(secondDate, firstDate);
                 }
 
-                var duplicateGroup = _random.Next(int.MaxValue);
-                                    
+                int duplicateGroup;
+                if (firstDate.DuplicateGroup != -1)
+                {
+                    duplicateGroup = firstDate.DuplicateGroup;
+                }
+                else if (secondDate.DuplicateGroup != -1)
+                {
+                    duplicateGroup = secondDate.DuplicateGroup;
+                }
+                else
+                {
+                    duplicateGroup = _random.Next(int.MaxValue);
+                }
+
                 // mark same as
                 secondDate.DuplicateGroup = duplicateGroup;
                 firstDate.DuplicateGroup = duplicateGroup;

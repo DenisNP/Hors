@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text.RegularExpressions;
 using Hors.Models;
 
@@ -13,9 +12,15 @@ namespace Hors.Recognizers
             ForAllMatches(data.GetPattern, pattern: GetRegexPattern(), action: m => ParseMatch(data, m, userDate));
         }
 
-        public static void ForAllMatches(Func<string> input, string pattern, Predicate<Match> action)
+        public static void ForAllMatches(Func<string> input, string pattern, Predicate<Match> action, bool reversed = false)
         {
-            var match = Regex.Match(input.Invoke(), pattern);
+            var matches = Regex.Matches(input.Invoke(), pattern);
+            if (matches.Count == 0)
+            {
+                return;
+            }
+
+            var match = reversed ? matches[matches.Count - 1] : matches[0];
             var indexesToSkip = new HashSet<int>();
 
             while (match != null && match.Success)
@@ -26,12 +31,13 @@ namespace Hors.Recognizers
                 }
 
                 match = null;
-                var matches = Regex.Matches(input.Invoke(), pattern);
+                matches = Regex.Matches(input.Invoke(), pattern);
                 for (var i = 0; i < matches.Count; i++)
                 {
-                    if (!indexesToSkip.Contains(matches[i].Index))
+                    var index = reversed ? matches.Count - i - 1 : i;
+                    if (!indexesToSkip.Contains(matches[index].Index))
                     {
-                        match = matches[i];
+                        match = matches[index];
                         break;
                     }
                 }

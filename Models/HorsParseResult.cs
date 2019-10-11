@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Hors.Utils;
 
 namespace Hors.Models
@@ -76,7 +77,7 @@ namespace Hors.Models
                        + (date.EndIndex < text.Length ? text.Substring(date.EndIndex) : "");
             }
 
-            return text.Trim();
+            return Regex.Replace(text.Trim(), @"\s{2,}", " ");
         }
 
         public string CleanTextWithTokens => string.Join(" ", Tokens);

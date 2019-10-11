@@ -11,21 +11,43 @@ namespace Hors.Tests
         public void Setup()
         {
         }
+
+        [Test]
+        public void TestCollapseDistanceDate()
+        {
+            var parser = new HorsTextParser();
+            var result = parser.Parse("на следующей неделе будет событие в пятницу и будет оно в 12", new DateTime(2019, 10, 8), 3);
+            
+            Assert.AreEqual(1, result.Dates.Count);
+            Console.WriteLine(result);
+            Assert.AreEqual("будет событие и будет оно", result.Text);
+            var date = result.Dates.First();
+            Assert.AreEqual(DateTimeTokenType.Fixed, date.Type);
+            Assert.AreEqual(18, date.DateFrom.Day);
+            Assert.AreEqual(12, date.DateFrom.Hour);
+        }
         
         [Test]
-        public void TestCollapseDistance()
+        public void TestCollapseDistanceTime()
         {
             var parser = new HorsTextParser();
             var result = parser.Parse("в четверг будет событие в 16 0 0", new DateTime(2019, 10, 8), 3);
             
             Assert.AreEqual(1, result.Dates.Count);
-            Console.WriteLine(result.Text);
             Assert.AreEqual("будет событие", result.Text.Trim());
             var date = result.Dates.First();
             Assert.AreEqual(DateTimeTokenType.Fixed, date.Type);
             Assert.AreEqual(true, date.HasTime);
             Assert.AreEqual(16, date.DateFrom.Hour);
             Assert.AreEqual(10, date.DateFrom.Day);
+            
+            result = parser.Parse("завтра встреча с другом в 12", new DateTime(2019, 10, 11), 5);
+            Assert.AreEqual(1, result.Dates.Count);
+            date = result.Dates.First();
+            Assert.AreEqual(DateTimeTokenType.Fixed, date.Type);
+            Assert.AreEqual(true, date.HasTime);
+            Assert.AreEqual(12, date.DateFrom.Hour);
+            Assert.AreEqual(12, date.DateFrom.Day);
             
             result = parser.Parse("в четверг будет хорошее событие в 16 0 0", new DateTime(2019, 10, 8), 2);
             
