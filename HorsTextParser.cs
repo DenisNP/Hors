@@ -15,11 +15,24 @@ namespace Hors
 
         public HorsParseResult Parse(string text, DateTime userDate, int collapseDistance = 4)
         {
-            var tokens = Regex.Split(text, "[^а-яА-ЯёЁa-zA-Z0-9-]");
-            return Parse(tokens, userDate, text, collapseDistance);
+            var pattern = "[^а-яА-ЯёЁa-zA-Z0-9-]+";
+            var tokens = Regex.Split(text, pattern);
+            var splitMatches = Regex.Matches(text, pattern);
+            var splitTokens = new List<(int, int)>();
+            foreach (Match splitMatch in splitMatches)
+            {
+                splitTokens.Add((splitMatch.Index, splitMatch.Length));
+            }
+            return DoParse(tokens, userDate, collapseDistance, text, splitTokens);
         }
 
-        public HorsParseResult Parse(IEnumerable<string> tokensList, DateTime userDate, string sourceText = null, int collapseDistance = 3)
+        public HorsParseResult Parse(IEnumerable<string> tokensList, DateTime userDate, int collapseDistance = 4)
+        {
+            return DoParse(tokensList, userDate, collapseDistance);
+        }
+
+        private HorsParseResult DoParse(IEnumerable<string> tokensList, DateTime userDate, 
+            int collapseDistance, string sourceText = null, List<(int, int)> splitTokens = null)
         {
             var tokens = tokensList.ToList();
 
@@ -59,9 +72,33 @@ namespace Hors
             // if any dates overlap in source string, stretch them
             FixOverlap(finalPeriods);
             
+            // fix indexes because tokens between words may have length > 1
+            FixIndexes(finalPeriods, splitTokens);
+            
             // return result
             var srcText = sourceText ?? string.Join(" ", tokens);
             return new HorsParseResult(srcText, data.Tokens.Select(t => t.Value).ToList(), finalPeriods);
+        }
+
+        private void FixIndexes(List<DateTimeToken> finalPeriods, List<(int, int)> splitTokens)
+        {
+            if (splitTokens == null) return;
+            
+            foreach (var splitToken in splitTokens)
+            {
+                foreach (var period in finalPeriods)
+                {
+                    if (period.StartIndex > splitToken.Item1)
+                    {
+                        period.StartIndex += splitToken.Item2 - 1;
+                        period.EndIndex += splitToken.Item2 - 1;
+                    }
+                    else if (period.StartIndex < splitToken.Item1 && period.EndIndex > splitToken.Item1)
+                    {
+                        period.EndIndex += splitToken.Item2 - 1;
+                    }
+                }
+            }
         }
 
         private bool CreateDatePeriod(Match match, DatesRawData data, DateTime userDate, List<DateTimeToken> finalPeriods)

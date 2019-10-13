@@ -47,6 +47,7 @@ namespace Hors.Recognizers
             {
                 date.Date = userDate.AddDays(diff);
                 date.Fix(FixPeriod.Day);
+                date.FixDayOfWeek = true;
             }
             
             // remove and insert

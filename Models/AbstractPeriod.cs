@@ -15,6 +15,7 @@ namespace Hors.Models
         public int End { get; set; }
 
         public int DuplicateGroup { get; set; } = -1;
+        public bool FixDayOfWeek { get; set; } = false;
 
         private static int _maxPeriod = -1;
 
@@ -160,8 +161,25 @@ namespace Hors.Models
             // day
             if (!basePeriod.IsFixed(FixPeriod.Day) && coverPeriod.IsFixed(FixPeriod.Day))
             {
-                basePeriod.Date = new DateTime(basePeriod.Date.Year, basePeriod.Date.Month, coverPeriod.Date.Day);
-                basePeriod.Fix(FixPeriod.Week, FixPeriod.Day);
+                if (coverPeriod.FixDayOfWeek)
+                {
+                    // take only day of week from cover
+                    basePeriod.Date = TakeDayOfWeekFrom(
+                        new DateTime(
+                            basePeriod.Date.Year, basePeriod.Date.Month,
+                            basePeriod.IsFixed(FixPeriod.Week) ? basePeriod.Date.Day : 1
+                        ),
+                        coverPeriod.Date,
+                        !basePeriod.IsFixed(FixPeriod.Week)
+                    );
+                    basePeriod.Fix(FixPeriod.Week, FixPeriod.Day);
+                }
+                else
+                {
+                    // take day from cover
+                    basePeriod.Date = new DateTime(basePeriod.Date.Year, basePeriod.Date.Month, coverPeriod.Date.Day);
+                    basePeriod.Fix(FixPeriod.Week, FixPeriod.Day);
+                }
             }
             
             // time
@@ -205,14 +223,15 @@ namespace Hors.Models
             return true;
         }
         
-        public static DateTime TakeDayOfWeekFrom(DateTime currentDate, DateTime takeFrom)
+        public static DateTime TakeDayOfWeekFrom(DateTime currentDate, DateTime takeFrom, bool onlyForward = false)
         {
             var needDow = (int)takeFrom.DayOfWeek;
             if (needDow == 0) needDow = 7;
             var currentDow = (int)currentDate.DayOfWeek;
             if (currentDow == 0) currentDow = 7;
-
-            return currentDate.AddDays(needDow - currentDow);
+            var diff = needDow - currentDow;
+            if (onlyForward && diff < 0) diff += 7;
+            return currentDate.AddDays(diff);
         }
 
         public void SetEdges(int startIndex, int endIndex)

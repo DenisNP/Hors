@@ -13,13 +13,44 @@ namespace Hors.Tests
         }
 
         [Test]
+        public void TestWeekday()
+        {
+            var parser = new HorsTextParser();
+            var result = parser.Parse("В следующем месяце во вторник состоится событие", new DateTime(2019, 10, 13), 3);
+            
+            Assert.AreEqual(1, result.Dates.Count);
+            var date = result.Dates.First();
+            Assert.AreEqual(5, date.DateFrom.Day);
+            Assert.AreEqual(11, date.DateFrom.Month);
+            
+            result = parser.Parse("Через месяц во вторник состоится событие", new DateTime(2019, 10, 13), 3);
+            Assert.AreEqual(1, result.Dates.Count);
+            date = result.Dates.First();
+            Assert.AreEqual(12, date.DateFrom.Day);
+            Assert.AreEqual(11, date.DateFrom.Month);
+        }
+
+        [Test]
+        public void TestPunctuationAndIndexes()
+        {
+            var parser = new HorsTextParser();
+            var result = parser.Parse("Через месяц, неделю и 2 дня состоится событие!", new DateTime(2019, 10, 13), 3);
+            
+            Assert.AreEqual(1, result.Dates.Count);
+            Assert.AreEqual("состоится событие!", result.Text);
+            
+            result = parser.Parse("=== 26!%;марта   в 18:00 , , , будет *** экзамен!!", new DateTime(2019, 10, 13), 3);
+            Assert.AreEqual(1, result.Dates.Count);
+            Assert.AreEqual("=== , , , будет *** экзамен!!", result.Text);
+        }
+
+        [Test]
         public void TestCollapseDistanceDate()
         {
             var parser = new HorsTextParser();
             var result = parser.Parse("на следующей неделе будет событие в пятницу и будет оно в 12", new DateTime(2019, 10, 8), 3);
             
             Assert.AreEqual(1, result.Dates.Count);
-            Console.WriteLine(result);
             Assert.AreEqual("будет событие и будет оно", result.Text);
             var date = result.Dates.First();
             Assert.AreEqual(DateTimeTokenType.Fixed, date.Type);

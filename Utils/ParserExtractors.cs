@@ -8,7 +8,7 @@ namespace Hors.Utils
         internal static string CreatePatternFromToken(string token)
         {
             var t = token.ToLower().Replace("[^0-9а-яё-]", "").Trim();
-            
+
             if (Morph.HasOneOfLemmas(t, Keywords.Year)) return "Y";
             if (Morph.HasOneOfLemmas(t, Keywords.Months().ToArray())) return "M";
             if (Morph.HasOneOfLemmas(t, Keywords.DaysOfWeek().ToArray())) return "D";
