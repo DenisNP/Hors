@@ -5,13 +5,13 @@ namespace Hors.Models
 {
     public enum FixPeriod
     {
-        None = 0,
-        Time = 1,
+        None          = 0,
+        Time          = 1,
         TimeUncertain = 2,
-        Day = 4,
-        Week = 8,
-        Month = 16,
-        Year = 32
+        Day           = 4,
+        Week          = 8,
+        Month         = 16,
+        Year          = 32
     }
 
     public class DateTimeToken
