@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Hors.Utils
@@ -50,6 +51,13 @@ namespace Hors.Utils
             }
             // Substring.
             return value.Substring(removeFromStart, value.Length - removeFromEnd - removeFromStart);
+        }
+
+        internal static void SwapTwo<T>(this List<T> list, int firstIndex, int secondIndex)
+        {
+            T tmp = list[firstIndex];
+            list[firstIndex] = list[secondIndex];
+            list[secondIndex] = tmp;
         }
     }
 }

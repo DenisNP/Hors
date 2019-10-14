@@ -343,6 +343,20 @@ namespace Hors
                 var currentDate = data.Dates[currentIndex];
                 var nextDate = data.Dates[currentIndex + 1];
 
+                // try to make base date less specific than cover date
+                if (
+                    nextDate != null
+                    && AbstractPeriod.CanCollapse(nextDate, currentDate)
+                    && nextDate.MaxFixed() > currentDate.MaxFixed()
+                )
+                {
+                    // swap dates
+                    data.Dates.SwapTwo(currentIndex, currentIndex + 1);
+                    data.Tokens.SwapTwo(currentIndex, currentIndex + 1);
+                    currentDate = data.Dates[currentIndex];
+                    nextDate = data.Dates[currentIndex + 1];
+                }
+                
                 if (nextDate == null || AbstractPeriod.CollapseTwo(currentDate, nextDate))
                 {
                     data.Dates.RemoveAt(currentIndex + 1);
@@ -371,12 +385,12 @@ namespace Hors
             var firstDate = data.Dates[match.Groups[1].Index];
             var secondDate = data.Dates[match.Groups[2].Index];
 
-            if ((firstDate.Fixed & secondDate.Fixed) == 0)
+            if (AbstractPeriod.CanCollapse(firstDate, secondDate))
             {
                 var (firstStart, firstEnd, secondStart, secondEnd) 
                     = (firstDate.Start, firstDate.End, secondDate.Start, secondDate.End);
                 
-                if (firstDate.MinFixed() > secondDate.MinFixed())
+                if (firstDate.MaxFixed() > secondDate.MaxFixed())
                 {
                     AbstractPeriod.CollapseTwo(firstDate, secondDate);
                 }

@@ -13,6 +13,26 @@ namespace Hors.Tests
         }
 
         [Test]
+        public void TestCollapseDirection()
+        {
+            var strings = new[]
+            {
+                "В следующем месяце с понедельника буду ходить в спортзал!",
+                "С понедельника в следующем месяце буду ходить в спортзал!"
+            };
+            
+            var parser = new HorsTextParser();
+            foreach (var s in strings)
+            {
+                var result = parser.Parse(s, new DateTime(2019, 10, 15), 3);
+                Assert.AreEqual(1, result.Dates.Count);
+                var date = result.Dates.First();
+                Assert.AreEqual(4, date.DateFrom.Day);
+                Assert.AreEqual(11, date.DateFrom.Month);
+            }
+        }
+
+        [Test]
         public void TestWeekday()
         {
             var parser = new HorsTextParser();

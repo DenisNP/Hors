@@ -105,10 +105,15 @@ namespace Hors.Models
                 $"Fixed={Convert.ToString(Fixed, 2)}]";
         }
 
-        public static bool CollapseTwo(AbstractPeriod basePeriod, AbstractPeriod coverPeriod)
+        public static bool CanCollapse(AbstractPeriod basePeriod, AbstractPeriod coverPeriod)
         {
             if ((basePeriod.Fixed & coverPeriod.Fixed) != 0) return false;
-            if (basePeriod.SpanDirection == -coverPeriod.SpanDirection && basePeriod.SpanDirection != 0) return false;
+            return basePeriod.SpanDirection != -coverPeriod.SpanDirection || basePeriod.SpanDirection == 0;
+        }
+
+        public static bool CollapseTwo(AbstractPeriod basePeriod, AbstractPeriod coverPeriod)
+        {
+            if (!CanCollapse(basePeriod, coverPeriod)) return false;
 
             // if span
             if (basePeriod.SpanDirection != 0)
