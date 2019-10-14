@@ -16,27 +16,28 @@ namespace Hors.Recognizers
         {
             // determine if it is time
             if (
-                (
-                    /*match.Groups[2].Success // во фразе есть "в/с/до"
-                    || (
-                        match.Groups[3].Success // во фразе есть "половина/четверть" + число
-                        && match.Groups[5].Success
-                        ) */
-                    match.Groups[5].Success // во фразе есть число
-                    || match.Groups[6].Success // во фразе есть "часов"
-                    || match.Groups[1].Success // во фразе есть "утра/дня/вечера/ночи"
-                    || match.Groups[9].Success
-                    )
-                && (
-                    match.Groups[5].Success // либо число
-                    || (
-                        match.Groups[4].Success //  либо без числа, но "час дня/ночи"
-                        && (match.Groups[9].Success || match.Groups[1].Success)
-                        && "dg".Any(t => t.ToString() == match.Groups[9].Value)
-                        )
-                    )
-                )
+                match.Groups[5].Success // во фразе есть число
+                || match.Groups[6].Success // во фразе есть "часов"
+                || match.Groups[1].Success // во начале есть "утра/дня/вечера/ночи"
+                || match.Groups[9].Success // то же самое в конце
+            )
             {
+                if (!match.Groups[5].Success)
+                {
+                    // no number in phrase
+                    var partOfDay = match.Groups[9].Success 
+                        ? match.Groups[9].Value 
+                        : match.Groups[1].Success 
+                            ? match.Groups[1].Value 
+                            : "";
+                    
+                    // no part of day AND no "from" token in phrase, quit
+                    if (partOfDay != "d" && partOfDay != "g" && !match.Groups[2].Success)
+                    {
+                        return false;
+                    }
+                }
+                
                 // hours and minutes
                 var hours = match.Groups[5].Success ? int.Parse(data.Tokens[match.Groups[5].Index].Value) : 1;
                 if (hours >= 0 && hours <= 23)
