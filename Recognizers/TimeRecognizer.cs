@@ -18,6 +18,7 @@ namespace Hors.Recognizers
             if (
                 match.Groups[5].Success // во фразе есть число
                 || match.Groups[6].Success // во фразе есть "часов"
+                || match.Groups[4].Success // во фразе есть "час"
                 || match.Groups[1].Success // во начале есть "утра/дня/вечера/ночи"
                 || match.Groups[9].Success // то же самое в конце
             )
@@ -70,10 +71,20 @@ namespace Hors.Recognizers
                     if (hours > 12) date.Fix(FixPeriod.Time);
 
                     // correct time
-                    if (hours <= 12 && (match.Groups[9].Success || match.Groups[1].Success))
+                    if (hours <= 12)
                     {
-                        // part of day
-                        var part = match.Groups[1].Success ? match.Groups[1].Value : match.Groups[9].Value;
+                        var part = "d"; // default
+                        if (match.Groups[9].Success || match.Groups[1].Success)
+                        {
+                            // part of day
+                            part = match.Groups[1].Success ? match.Groups[1].Value : match.Groups[9].Value;
+                            date.Fix(FixPeriod.Time);
+                        }
+                        else
+                        {
+                            date.Fix(FixPeriod.TimeUncertain);
+                        }
+                        
                         switch (part)
                         {
                             case "d": // day
@@ -88,9 +99,8 @@ namespace Hors.Recognizers
                         }
 
                         if (hours == 24) hours = 0;
-                        date.Fix(FixPeriod.Time);
                     }
-                    
+
                     date.Time = new TimeSpan(hours, minutes, 0);
 
                     // remove and insert
