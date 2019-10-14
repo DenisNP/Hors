@@ -65,7 +65,9 @@ namespace Hors.Models
                 Span = Span,
                 SpanDirection = SpanDirection,
                 Start = Start,
-                End = End
+                End = End,
+                DuplicateGroup = DuplicateGroup,
+                FixDayOfWeek = FixDayOfWeek
             };
         }
 
@@ -168,6 +170,16 @@ namespace Hors.Models
             {
                 if (coverPeriod.FixDayOfWeek)
                 {
+                    /*if (!basePeriod.IsFixed(FixPeriod.Year))
+                    {
+                        basePeriod.Date = new DateTime(coverPeriod.Date.Year, basePeriod.Date.Month, basePeriod.Date.Day);
+                    }
+
+                    if (!basePeriod.IsFixed(FixPeriod.Month))
+                    {
+                        basePeriod.Date = new DateTime(basePeriod.Date.Year, coverPeriod.Date.Month, basePeriod.Date.Day);
+                    }*/
+                    
                     // take only day of week from cover
                     basePeriod.Date = TakeDayOfWeekFrom(
                         new DateTime(

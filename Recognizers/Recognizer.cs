@@ -25,17 +25,22 @@ namespace Hors.Recognizers
 
             while (match != null && match.Success)
             {
+                var text = input.Invoke();
+                var matchIndex = reversed ? text.Length - match.Index : match.Index;
+                
                 if (!action.Invoke(match))
                 {
-                    indexesToSkip.Add(match.Index);
+                    indexesToSkip.Add(matchIndex);
                 }
 
                 match = null;
-                matches = Regex.Matches(input.Invoke(), pattern);
+                text = input.Invoke();
+                matches = Regex.Matches(text, pattern);
                 for (var i = 0; i < matches.Count; i++)
                 {
                     var index = reversed ? matches.Count - i - 1 : i;
-                    if (!indexesToSkip.Contains(matches[index].Index))
+                    matchIndex = reversed ? text.Length - matches[index].Index : matches[index].Index;
+                    if (!indexesToSkip.Contains(matchIndex))
                     {
                         match = matches[index];
                         break;

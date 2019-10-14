@@ -47,11 +47,39 @@ namespace Hors
             _recognizers.ForEach(r => r.ParseTokens(data, userDate));
 
             // collapse dates first batch
-            Recognizer.ForAllMatches(data.GetPattern, "@(@|[fo]@)+", m => CollapseDates(m, data, userDate));
-            Recognizer.ForAllMatches(data.GetPattern, "t@(@|t@)+", m => CollapseDates(m, data, userDate));
+            var endPeriodsPattern = "(?<=(t))(@)(?=((N?t?)(@)))";
+            var startPeriodsPattern = "(?<!(t))(@)(?=((N?[fo]?)(@)))";
+            
+            // all end periods
+            Recognizer.ForAllMatches(
+                data.GetPattern,
+                endPeriodsPattern,
+                m => CollapseDates(m, data, userDate), 
+                true
+            );
+            // all start periods
+            Recognizer.ForAllMatches(
+                data.GetPattern,
+                startPeriodsPattern,
+                m => CollapseDates(m, data, userDate), 
+                true
+            );
 
             // take values from neighbours
-            Recognizer.ForAllMatches(data.GetPattern, "@{2,}", m => TakeFromAdjacent(m, data, userDate));
+            // all end periods
+            Recognizer.ForAllMatches(
+                data.GetPattern,
+                endPeriodsPattern,
+                m => TakeFromAdjacent(m, data, userDate), 
+                true
+            );
+            // all start periods
+            Recognizer.ForAllMatches(
+                data.GetPattern,
+                startPeriodsPattern,
+                m => TakeFromAdjacent(m, data, userDate), 
+                true
+            );
             
             // collapse closest dates
             if (collapseDistance > 0)
@@ -67,7 +95,7 @@ namespace Hors
                 data.GetPattern,
                 "(([fo]?(@)t(@))|([fo]?(@)))",
                 m => CreateDatePeriod(m, data, userDate, finalPeriods)
-                );
+            );
             
             // if any dates overlap in source string, stretch them
             FixOverlap(finalPeriods);
@@ -335,49 +363,28 @@ namespace Hors
 
         private static bool CollapseDates(Match match, DatesRawData data, DateTime userDate)
         {
-            var seenTokens = 0;
-            var skippedTokens = 0;
-            while (seenTokens < match.Length - 1)
+            var firstDate = data.Dates[match.Groups[2].Index];
+            var secondDate = data.Dates[match.Groups[5].Index];
+
+            if (!AbstractPeriod.CanCollapse(firstDate, secondDate))
             {
-                var currentIndex = match.Index + skippedTokens;
-                var currentDate = data.Dates[currentIndex];
-                var nextDate = data.Dates[currentIndex + 1];
-
-                // try to make base date less specific than cover date
-                if (
-                    nextDate != null
-                    && AbstractPeriod.CanCollapse(nextDate, currentDate)
-                    && nextDate.MaxFixed() > currentDate.MaxFixed()
-                )
-                {
-                    // swap dates
-                    data.Dates.SwapTwo(currentIndex, currentIndex + 1);
-                    data.Tokens.SwapTwo(currentIndex, currentIndex + 1);
-                    currentDate = data.Dates[currentIndex];
-                    nextDate = data.Dates[currentIndex + 1];
-                }
-                
-                if (nextDate == null || AbstractPeriod.CollapseTwo(currentDate, nextDate))
-                {
-                    data.Dates.RemoveAt(currentIndex + 1);
-                    data.Tokens.RemoveAt(currentIndex + 1);
-                    data.Pattern = data.Pattern.Remove(currentIndex + 1, 1);
-                    
-                    // add next token end index to current date
-                    if (nextDate == null)
-                    {
-                        var nextToken = data.Tokens[currentIndex + 1];
-                        currentDate.End = nextToken.End;
-                    }
-                }
-                else
-                {
-                    skippedTokens++;
-                }
-
-                seenTokens++;
+                return false;
             }
-            return skippedTokens == 0;
+
+            if (firstDate.MinFixed() < secondDate.MinFixed())
+            {
+                AbstractPeriod.CollapseTwo(secondDate, firstDate);
+                secondDate.Start = firstDate.Start;
+                data.RemoveRange(match.Groups[2].Index, match.Groups[2].Length + match.Groups[4].Length);
+            }
+            else
+            {
+                AbstractPeriod.CollapseTwo(firstDate, secondDate);
+                firstDate.End = secondDate.End;
+                data.RemoveRange(match.Groups[3].Index, match.Groups[3].Length);
+            }
+            
+            return true;
         }
         
         private bool CollapseClosest(Match match, DatesRawData data, DateTime userDate)
@@ -390,7 +397,7 @@ namespace Hors
                 var (firstStart, firstEnd, secondStart, secondEnd) 
                     = (firstDate.Start, firstDate.End, secondDate.Start, secondDate.End);
                 
-                if (firstDate.MaxFixed() > secondDate.MaxFixed())
+                if (firstDate.MinFixed() > secondDate.MinFixed())
                 {
                     AbstractPeriod.CollapseTwo(firstDate, secondDate);
                 }
@@ -429,28 +436,37 @@ namespace Hors
         
         private bool TakeFromAdjacent(Match match, DatesRawData data, DateTime userDate)
         {
-            for (var i = match.Index; i < match.Index + match.Length; i++)
+            var firstDate = data.Dates[match.Groups[2].Index];
+            var secondDate = data.Dates[match.Groups[5].Index];
+
+            var firstCopy = firstDate.CopyOf();
+            var secondCopy = secondDate.CopyOf();
+
+            firstCopy.Fixed &= (byte)~secondDate.Fixed;
+            secondCopy.Fixed &= (byte)~firstDate.Fixed;
+
+            if (firstDate.MinFixed() > secondCopy.MinFixed())
             {
-                // for current date take unfixed information from left and from right adjacent
-                var prevDate = i > match.Index ? data.Dates[i - 1] : null;
-                var currentDate = data.Dates[i];
-                var nextDate = i < match.Index + match.Length - 1 ? data.Dates[i + 1] : null;
+                AbstractPeriod.CollapseTwo(firstDate, secondCopy);
+            }
+            else
+            {
+                AbstractPeriod.CollapseTwo(secondCopy, firstDate);
+                data.Dates[match.Groups[2].Index] = secondCopy;
+                secondCopy.Start = firstDate.Start;
+                secondCopy.End = firstDate.End;
+            }
 
-                // take from left only non fixed here
-                if (prevDate != null)
-                {
-                    var prevDateCopy = prevDate.CopyOf();
-                    prevDateCopy.Fixed &= (byte)~currentDate.Fixed;
-                    AbstractPeriod.CollapseTwo(currentDate, prevDateCopy);
-                }
-
-                // take from right same way
-                if (nextDate != null)
-                {
-                    var nextDateCopy = nextDate.CopyOf();
-                    nextDateCopy.Fixed &= (byte)~currentDate.Fixed;
-                    AbstractPeriod.CollapseTwo(currentDate, nextDateCopy);
-                }
+            if (secondDate.MinFixed() > firstCopy.MinFixed())
+            {
+                AbstractPeriod.CollapseTwo(secondDate, firstCopy);
+            }
+            else
+            {
+                AbstractPeriod.CollapseTwo(firstCopy, secondDate);
+                data.Dates[match.Groups[5].Index] = firstCopy;
+                firstCopy.Start = secondDate.Start;
+                firstCopy.End = secondDate.End;
             }
 
             // this method doesn't modify tokens or array

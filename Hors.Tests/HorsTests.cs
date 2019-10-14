@@ -13,6 +13,47 @@ namespace Hors.Tests
         }
 
         [Test]
+        public void TestCollapseComplex()
+        {
+            var parser = new HorsTextParser();
+            var result = parser.Parse(
+                "В понедельник в 9 и 10 вечера",
+                new DateTime(2019, 10, 13), 3
+            );
+            
+            Assert.AreEqual(2, result.Dates.Count);
+            
+            var firstDate = result.Dates.First();
+            Assert.AreEqual(14, firstDate.DateFrom.Day);
+            Assert.AreEqual(21, firstDate.DateFrom.Hour);
+            
+            var secondDate = result.Dates.Last();
+            Assert.AreEqual(14, secondDate.DateFrom.Day);
+            Assert.AreEqual(22, secondDate.DateFrom.Hour);
+        }
+
+        [Test]
+        public void TestMultipleSimple()
+        {
+            var parser = new HorsTextParser();
+            var result = parser.Parse(
+                "Позавчера в 6:30 состоялось совещание, а завтра днём будет хорошая погода.",
+                new DateTime(2019, 10, 13), 3
+            );
+            
+            Assert.AreEqual(2, result.Dates.Count);
+            
+            var firstDate = result.Dates.First();
+            Assert.AreEqual(11, firstDate.DateFrom.Day);
+            Assert.AreEqual(6, firstDate.DateFrom.Hour);
+            Assert.AreEqual(30, firstDate.DateFrom.Minute);
+            
+            var secondDate = result.Dates.Last();
+            Assert.AreEqual(14, secondDate.DateFrom.Day);
+            Assert.AreEqual(true, secondDate.HasTime);
+        }
+
+        [Test]
         public void TestCollapseDirection()
         {
             var strings = new[]
@@ -124,6 +165,26 @@ namespace Hors.Tests
             Assert.AreEqual(true, date.HasTime);
             Assert.AreEqual(16, date.DateFrom.Hour);
             Assert.AreEqual(10, date.DateFrom.Day);
+        }
+
+        [Test]
+        public void TestTimePeriod()
+        {
+            var parser = new HorsTextParser();
+            var result = parser.Parse("В следующий четверг с 9 утра до 6 вечера важный экзамен!", new DateTime(2019, 9, 7));
+            
+            Assert.AreEqual(1, result.Dates.Count);
+            var date = result.Dates.First();
+            Assert.AreEqual(DateTimeTokenType.Period, date.Type);
+            Assert.AreEqual(true, date.HasTime);
+            Assert.AreEqual(9, date.DateFrom.Hour);
+            Assert.AreEqual(12, date.DateFrom.Day);
+            Assert.AreEqual(9, date.DateFrom.Month);
+            Assert.AreEqual(18, date.DateTo.Hour);
+            Assert.AreEqual(12, date.DateTo.Day);
+            Assert.AreEqual(9, date.DateTo.Month);
+            Assert.AreEqual(2019, date.DateFrom.Year);
+            Assert.AreEqual(2019, date.DateTo.Year);
         }
         
         [Test]
