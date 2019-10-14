@@ -47,20 +47,20 @@ namespace Hors
             _recognizers.ForEach(r => r.ParseTokens(data, userDate));
 
             // collapse dates first batch
-            var endPeriodsPattern = "(?<=(t))(@)(?=((N?t?)(@)))";
-            var startPeriodsPattern = "(?<!(t))(@)(?=((N?[fo]?)(@)))";
+            const string startPeriodsPattern = "(?<!(t))(@)(?=((N?[fo]?)(@)))";
+            const string endPeriodsPattern = "(?<=(t))(@)(?=((N?[fot]?)(@)))";
             
-            // all end periods
-            Recognizer.ForAllMatches(
-                data.GetPattern,
-                endPeriodsPattern,
-                m => CollapseDates(m, data, userDate), 
-                true
-            );
             // all start periods
             Recognizer.ForAllMatches(
                 data.GetPattern,
                 startPeriodsPattern,
+                m => CollapseDates(m, data, userDate), 
+                true
+            );
+            // all end periods
+            Recognizer.ForAllMatches(
+                data.GetPattern,
+                endPeriodsPattern,
                 m => CollapseDates(m, data, userDate), 
                 true
             );
@@ -84,7 +84,7 @@ namespace Hors
             // collapse closest dates
             if (collapseDistance > 0)
             {
-                var pattern = "(@)[^@]{1," + collapseDistance + "}(?=(@))";
+                var pattern = "(@)[^@t]{1," + collapseDistance + "}(?=(@))";
                 Recognizer.ForAllMatches(data.GetPattern, pattern,
                     m => CollapseClosest(m, data, userDate), true);
             }

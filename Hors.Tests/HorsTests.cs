@@ -13,6 +13,26 @@ namespace Hors.Tests
         }
 
         [Test]
+        public void TestLongPeriod()
+        {
+            var parser = new HorsTextParser();
+            var result = parser.Parse(
+                "С вечера следующей среды до четверти 10 утра понедельника в декабре можно будет наблюдать снег",
+                new DateTime(2019, 10, 14), 3
+            );
+            
+            Assert.AreEqual(1, result.Dates.Count);
+            var date = result.Dates.First();
+            Assert.AreEqual(DateTimeTokenType.Period, date.Type);
+            Assert.AreEqual(23, date.DateFrom.Day);
+            Assert.AreEqual(10, date.DateFrom.Month);
+            Assert.AreEqual(2, date.DateTo.Day);
+            Assert.AreEqual(12, date.DateTo.Month);
+            Assert.AreEqual(9, date.DateTo.Hour);
+            Assert.AreEqual(15, date.DateTo.Minute);
+        }
+
+        [Test]
         public void TestCollapseComplex()
         {
             var parser = new HorsTextParser();
