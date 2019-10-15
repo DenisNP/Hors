@@ -23,6 +23,11 @@ namespace Hors.Models
         {
             foreach (var f in fixes) Fixed |= (byte) f;
         }
+        
+        public void UnFix(FixPeriod time)
+        {
+            Fixed &= (byte)~time;
+        }
 
         public void FixDownTo(FixPeriod period)
         {
@@ -170,16 +175,6 @@ namespace Hors.Models
             {
                 if (coverPeriod.FixDayOfWeek)
                 {
-                    /*if (!basePeriod.IsFixed(FixPeriod.Year))
-                    {
-                        basePeriod.Date = new DateTime(coverPeriod.Date.Year, basePeriod.Date.Month, basePeriod.Date.Day);
-                    }
-
-                    if (!basePeriod.IsFixed(FixPeriod.Month))
-                    {
-                        basePeriod.Date = new DateTime(basePeriod.Date.Year, coverPeriod.Date.Month, basePeriod.Date.Day);
-                    }*/
-                    
                     // take only day of week from cover
                     basePeriod.Date = TakeDayOfWeekFrom(
                         new DateTime(
@@ -222,9 +217,18 @@ namespace Hors.Models
             
             if (!basePeriod.IsFixed(FixPeriod.TimeUncertain) && coverPeriod.IsFixed(FixPeriod.TimeUncertain))
             {
-                basePeriod.Time = coverPeriod.Time;
                 basePeriod.Fix(FixPeriod.TimeUncertain);
-                timeGot = true;
+                if (basePeriod.IsFixed(FixPeriod.Time))
+                {
+                    // take time from cover, but day part from base
+                    var offset = coverPeriod.Time.Hours <= 12 && basePeriod.Time.Hours > 12 ? 12 : 0;
+                    basePeriod.Time = new TimeSpan(coverPeriod.Time.Hours + offset, coverPeriod.Time.Minutes, 0);
+                }
+                else
+                {
+                    basePeriod.Time = coverPeriod.Time;
+                    timeGot = true;
+                }
             }
 
             // if this date is Span and we just got time from another non-span date, add this time to Span

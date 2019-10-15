@@ -137,22 +137,9 @@ namespace Hors
             if (match.Groups[3].Success && match.Groups[4].Success)
             {
                 // this is the period "from" - "to"
-                var fromDate = data.Dates[match.Groups[3].Index];
-                var toDate = data.Dates[match.Groups[4].Index];
-
-                // create from-copy with fixed only what not fixed here to collapse
-                var fromDateCopy = fromDate.CopyOf();
-                fromDateCopy.Fixed &= (byte)~toDate.Fixed;
-                fromDateCopy.SpanDirection = 0;
-                
-                // the same for to-copy
-                var toDateCopy = toDate.CopyOf();
-                toDateCopy.Fixed &= (byte)~fromDate.Fixed;
-                toDateCopy.SpanDirection = 0;
-                
-                // set empty periods from each other
-                AbstractPeriod.CollapseTwo(fromDate, toDateCopy);
-                AbstractPeriod.CollapseTwo(toDate, fromDateCopy);
+                var (fromDate, toDate) = TakeFromAdjacent(
+                    data, match.Groups[3].Index, match.Groups[4].Index
+                );
 
                 // final dates
                 var fromToken = ConvertToToken(fromDate, userDate);
@@ -436,8 +423,18 @@ namespace Hors
         
         private bool TakeFromAdjacent(Match match, DatesRawData data, DateTime userDate)
         {
-            var firstDate = data.Dates[match.Groups[2].Index];
-            var secondDate = data.Dates[match.Groups[5].Index];
+            TakeFromAdjacent(data, match.Groups[2].Index, match.Groups[5].Index);
+
+            // this method doesn't modify tokens or array
+            return false;
+        }
+
+        private (AbstractPeriod firstDate, AbstractPeriod secondDate) TakeFromAdjacent(
+            DatesRawData data, int firstIndex, int secondIndex
+        )
+        {
+            var firstDate = data.Dates[firstIndex];
+            var secondDate = data.Dates[secondIndex];
 
             var firstCopy = firstDate.CopyOf();
             var secondCopy = secondDate.CopyOf();
@@ -452,7 +449,7 @@ namespace Hors
             else
             {
                 AbstractPeriod.CollapseTwo(secondCopy, firstDate);
-                data.Dates[match.Groups[2].Index] = secondCopy;
+                data.Dates[firstIndex] = secondCopy;
                 secondCopy.Start = firstDate.Start;
                 secondCopy.End = firstDate.End;
             }
@@ -464,13 +461,12 @@ namespace Hors
             else
             {
                 AbstractPeriod.CollapseTwo(firstCopy, secondDate);
-                data.Dates[match.Groups[5].Index] = firstCopy;
+                data.Dates[secondIndex] = firstCopy;
                 firstCopy.Start = secondDate.Start;
                 firstCopy.End = secondDate.End;
             }
 
-            // this method doesn't modify tokens or array
-            return false;
+            return (data.Dates[firstIndex], data.Dates[secondIndex]);
         }
 
         private static List<Recognizer> DefaultRecognizers()

@@ -13,6 +13,24 @@ namespace Hors.Tests
         }
 
         [Test]
+        public void TestTimePeriodBeforeDay()
+        {
+            var parser = new HorsTextParser();
+            var result = parser.Parse(
+                "с 5 до 7 вечера в понедельник будет событие",
+                new DateTime(2019, 10, 13), 3
+            );
+            
+            Assert.AreEqual(1, result.Dates.Count);
+            var date = result.Dates.First();
+            Assert.AreEqual(DateTimeTokenType.Period, date.Type);
+            Assert.AreEqual(17, date.DateFrom.Hour);
+            Assert.AreEqual(19, date.DateTo.Hour);
+            Assert.AreEqual(14, date.DateFrom.Day);
+            Assert.AreEqual(14, date.DateTo.Day);
+        }
+
+        [Test]
         public void TestDaytime()
         {
             var parser = new HorsTextParser();
