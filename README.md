@@ -64,7 +64,8 @@ using Hors;
 var hors = new HorsTextParser();
 var result = hors.Parse("26 марта в 11 вечера будет красивый закат", DateTime.Now);
 
-var text = result.Text; // -> string: "{0} будет красивый закат"
+var text = result.Text; // -> string: "будет красивый закат"
+var formatText = result.TextWithTokens; // -> string: "{0} будет красивый закат"
 var date = result.Dates[0].DateFrom; // -> DateTime: 26.03.2019 23:00:00
 ```
 
