@@ -228,6 +228,15 @@ namespace Hors
             {
                 case FixPeriod.Month:
                     datePeriod.Date = new DateTime(userDate.Year, datePeriod.Date.Month, datePeriod.Date.Day);
+                    if (userDate > datePeriod.Date)
+                    {
+                        // take next year
+                        datePeriod.Date = new DateTime(
+                            userDate.Year + 1,
+                            datePeriod.Date.Month,
+                            datePeriod.Date.Day
+                        );
+                    }
                     break;
                 case FixPeriod.Day:
                     // day of week fixed, take closest next

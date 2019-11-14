@@ -13,6 +13,23 @@ namespace Hors.Tests
         }
 
         [Test]
+        public void TestJanuary()
+        {
+            var parser = new HorsTextParser();
+            var result = parser.Parse(
+                "10 января событие",
+                new DateTime(2019, 10, 13), 3
+            );
+            
+            Assert.AreEqual(1, result.Dates.Count);
+            var date = result.Dates.First();
+            Assert.AreEqual(DateTimeTokenType.Fixed, date.Type);
+            Assert.AreEqual(10, date.DateFrom.Day);
+            Assert.AreEqual(1, date.DateFrom.Month);
+            Assert.AreEqual(2020, date.DateFrom.Year);
+        }
+
+        [Test]
         public void TestTimePeriodBeforeDay()
         {
             var parser = new HorsTextParser();
@@ -57,6 +74,7 @@ namespace Hors.Tests
             Assert.AreEqual(1, result.Dates.Count);
             var date = result.Dates.First();
             Assert.AreEqual(DateTimeTokenType.Period, date.Type);
+            Assert.AreEqual(2019, date.DateFrom.Year);
             Assert.AreEqual(23, date.DateFrom.Day);
             Assert.AreEqual(10, date.DateFrom.Month);
             Assert.AreEqual(2, date.DateTo.Day);
@@ -77,6 +95,7 @@ namespace Hors.Tests
             Assert.AreEqual(2, result.Dates.Count);
             
             var firstDate = result.Dates.First();
+            Assert.AreEqual(2019, firstDate.DateFrom.Year);
             Assert.AreEqual(14, firstDate.DateFrom.Day);
             Assert.AreEqual(21, firstDate.DateFrom.Hour);
             
@@ -97,11 +116,13 @@ namespace Hors.Tests
             Assert.AreEqual(2, result.Dates.Count);
             
             var firstDate = result.Dates.First();
+            Assert.AreEqual(2019, firstDate.DateFrom.Year);
             Assert.AreEqual(11, firstDate.DateFrom.Day);
             Assert.AreEqual(6, firstDate.DateFrom.Hour);
             Assert.AreEqual(30, firstDate.DateFrom.Minute);
             
             var secondDate = result.Dates.Last();
+            Assert.AreEqual(2019, secondDate.DateFrom.Year);
             Assert.AreEqual(14, secondDate.DateFrom.Day);
             Assert.AreEqual(true, secondDate.HasTime);
         }
@@ -121,6 +142,7 @@ namespace Hors.Tests
                 var result = parser.Parse(s, new DateTime(2019, 10, 15), 3);
                 Assert.AreEqual(1, result.Dates.Count);
                 var date = result.Dates.First();
+                Assert.AreEqual(2019, date.DateFrom.Year);
                 Assert.AreEqual(4, date.DateFrom.Day);
                 Assert.AreEqual(11, date.DateFrom.Month);
             }
@@ -134,12 +156,14 @@ namespace Hors.Tests
             
             Assert.AreEqual(1, result.Dates.Count);
             var date = result.Dates.First();
+            Assert.AreEqual(2019, date.DateFrom.Year);
             Assert.AreEqual(5, date.DateFrom.Day);
             Assert.AreEqual(11, date.DateFrom.Month);
             
             result = parser.Parse("Через месяц во вторник состоится событие", new DateTime(2019, 10, 13), 3);
             Assert.AreEqual(1, result.Dates.Count);
             date = result.Dates.First();
+            Assert.AreEqual(2019, date.DateFrom.Year);
             Assert.AreEqual(12, date.DateFrom.Day);
             Assert.AreEqual(11, date.DateFrom.Month);
         }
