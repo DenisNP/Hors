@@ -18,7 +18,8 @@ namespace Hors.Recognizers
             var monthFixed = false;
 
             // parse month
-            var mStr = data.Tokens[match.Index + match.Groups[4].Length].Value;
+            var mStr = data.Tokens[match.Groups[2].Index].Value;
+            Console.WriteLine(mStr);
             var month = ParserUtils.FindIndex(mStr, Keywords.Months()) + 1;
             if (month == 0) month = userDate.Month; // # instead M
             else monthFixed = true;
