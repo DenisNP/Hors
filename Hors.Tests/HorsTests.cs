@@ -61,6 +61,26 @@ namespace Hors.Tests
             Assert.AreEqual(DateTimeTokenType.Fixed, date.Type);
             Assert.AreEqual(13, date.DateFrom.Hour);
         }
+        
+        [Test]
+        public void TestNighttime()
+        {
+            var parser = new HorsTextParser();
+            var result = parser.Parse(
+                "Завтра в 2 ночи полнолуние, а затем в 3 часа ночи новолуние.",
+                new DateTime(2020, 01, 01)
+            );
+            
+            Assert.AreEqual(2, result.Dates.Count);
+            
+            var firstDate = result.Dates.First();
+            Assert.AreEqual(DateTimeTokenType.Fixed, firstDate.Type);
+            Assert.AreEqual(2, firstDate.DateFrom.Hour);
+
+            var secondDate = result.Dates.Last();
+            Assert.AreEqual(DateTimeTokenType.Fixed, secondDate.Type);
+            Assert.AreEqual(3, secondDate.DateFrom.Hour);
+        }
 
         [Test]
         public void TestLongPeriod()

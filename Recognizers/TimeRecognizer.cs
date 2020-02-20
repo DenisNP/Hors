@@ -94,7 +94,7 @@ namespace Hors.Recognizers
                                 if (hours <= 11) hours += 12;
                                 break;
                             case "g": // night
-                                hours += 12;
+                                if (hours == 12) hours += 12;
                                 break;
                         }
 
