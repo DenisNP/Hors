@@ -67,19 +67,24 @@ namespace Hors.Tests
         {
             var parser = new HorsTextParser();
             var result = parser.Parse(
-                "Завтра в 2 ночи полнолуние, а затем в 3 часа ночи новолуние.",
+                "Завтра в 2 ночи полнолуние, а затем в 3 часа ночи новолуние и наконец в 12 часов ночи игра.",
                 new DateTime(2020, 01, 01)
             );
             
-            Assert.AreEqual(2, result.Dates.Count);
+            Assert.AreEqual(3, result.Dates.Count);
             
-            var firstDate = result.Dates.First();
+            var firstDate = result.Dates[0];
             Assert.AreEqual(DateTimeTokenType.Fixed, firstDate.Type);
             Assert.AreEqual(2, firstDate.DateFrom.Hour);
 
-            var secondDate = result.Dates.Last();
+            var secondDate = result.Dates[1];
             Assert.AreEqual(DateTimeTokenType.Fixed, secondDate.Type);
             Assert.AreEqual(3, secondDate.DateFrom.Hour);
+
+            var thirdDate = result.Dates[2];
+            Assert.AreEqual(DateTimeTokenType.Fixed, thirdDate.Type);
+            Assert.AreEqual(0, thirdDate.DateFrom.Hour);
+            Assert.AreEqual(1, thirdDate.DateFrom.Day);
         }
 
         [Test]
