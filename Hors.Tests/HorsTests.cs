@@ -46,6 +46,22 @@ namespace Hors.Tests
             Assert.AreEqual(14, date.DateFrom.Day);
             Assert.AreEqual(14, date.DateTo.Day);
         }
+        
+        [Test]
+        public void TestTimePeriodSimple()
+        {
+            var parser = new HorsTextParser();
+            var result = parser.Parse(
+                "с 10 до 13 событие",
+                new DateTime(2019, 10, 13), 3
+            );
+            
+            Assert.AreEqual(1, result.Dates.Count);
+            var date = result.Dates.First();
+            Assert.AreEqual(DateTimeTokenType.Period, date.Type);
+            Assert.AreEqual(10, date.DateFrom.Hour);
+            Assert.AreEqual(13, date.DateTo.Hour);
+        }
 
         [Test]
         public void TestDaytime()
@@ -127,6 +143,23 @@ namespace Hors.Tests
             var secondDate = result.Dates.Last();
             Assert.AreEqual(14, secondDate.DateFrom.Day);
             Assert.AreEqual(22, secondDate.DateFrom.Hour);
+            
+            // reverse order
+            var resultR = parser.Parse(
+                "В понедельник в 10 и 9 вечера",
+                new DateTime(2019, 10, 13), 3
+            );
+            
+            Assert.AreEqual(2, resultR.Dates.Count);
+            
+            var firstDateR = resultR.Dates.First();
+            Assert.AreEqual(2019, firstDateR.DateFrom.Year);
+            Assert.AreEqual(14, firstDateR.DateFrom.Day);
+            Assert.AreEqual(22, firstDateR.DateFrom.Hour);
+            
+            var secondDateR = resultR.Dates.Last();
+            Assert.AreEqual(14, secondDateR.DateFrom.Day);
+            Assert.AreEqual(21, secondDateR.DateFrom.Hour);
         }
 
         [Test]

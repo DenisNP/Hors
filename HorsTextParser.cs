@@ -54,14 +54,14 @@ namespace Hors
             Recognizer.ForAllMatches(
                 data.GetPattern,
                 startPeriodsPattern,
-                m => CollapseDates(m, data, userDate), 
+                m => CollapseDates(m, data, userDate, false), 
                 true
             );
             // all end periods
             Recognizer.ForAllMatches(
                 data.GetPattern,
                 endPeriodsPattern,
-                m => CollapseDates(m, data, userDate), 
+                m => CollapseDates(m, data, userDate, false), 
                 true
             );
 
@@ -70,14 +70,14 @@ namespace Hors
             Recognizer.ForAllMatches(
                 data.GetPattern,
                 endPeriodsPattern,
-                m => TakeFromAdjacent(m, data, userDate), 
+                m => TakeFromAdjacent(m, data, userDate, false), 
                 true
             );
             // all start periods
             Recognizer.ForAllMatches(
                 data.GetPattern,
                 startPeriodsPattern,
-                m => TakeFromAdjacent(m, data, userDate), 
+                m => TakeFromAdjacent(m, data, userDate, false), 
                 true
             );
             
@@ -86,7 +86,7 @@ namespace Hors
             {
                 var pattern = "(@)[^@t]{1," + collapseDistance + "}(?=(@))";
                 Recognizer.ForAllMatches(data.GetPattern, pattern,
-                    m => CollapseClosest(m, data, userDate), true);
+                    m => CollapseClosest(m, data, userDate, false), true);
             }
 
             // find periods
@@ -138,7 +138,7 @@ namespace Hors
             {
                 // this is the period "from" - "to"
                 var (fromDate, toDate) = TakeFromAdjacent(
-                    data, match.Groups[3].Index, match.Groups[4].Index
+                    data, match.Groups[3].Index, match.Groups[4].Index, true
                 );
 
                 // final dates
@@ -357,7 +357,7 @@ namespace Hors
             return token;
         }
 
-        private static bool CollapseDates(Match match, DatesRawData data, DateTime userDate)
+        private static bool CollapseDates(Match match, DatesRawData data, DateTime userDate, bool isLinked)
         {
             var firstDate = data.Dates[match.Groups[2].Index];
             var secondDate = data.Dates[match.Groups[5].Index];
@@ -369,13 +369,13 @@ namespace Hors
 
             if (firstDate.MinFixed() < secondDate.MinFixed())
             {
-                AbstractPeriod.CollapseTwo(secondDate, firstDate);
+                AbstractPeriod.CollapseTwo(secondDate, firstDate, isLinked);
                 secondDate.Start = firstDate.Start;
                 data.RemoveRange(match.Groups[2].Index, match.Groups[2].Length + match.Groups[4].Length);
             }
             else
             {
-                AbstractPeriod.CollapseTwo(firstDate, secondDate);
+                AbstractPeriod.CollapseTwo(firstDate, secondDate, isLinked);
                 firstDate.End = secondDate.End;
                 data.RemoveRange(match.Groups[3].Index, match.Groups[3].Length);
             }
@@ -383,7 +383,7 @@ namespace Hors
             return true;
         }
         
-        private bool CollapseClosest(Match match, DatesRawData data, DateTime userDate)
+        private bool CollapseClosest(Match match, DatesRawData data, DateTime userDate, bool isLinked)
         {
             var firstDate = data.Dates[match.Groups[1].Index];
             var secondDate = data.Dates[match.Groups[2].Index];
@@ -395,11 +395,11 @@ namespace Hors
                 
                 if (firstDate.MinFixed() > secondDate.MinFixed())
                 {
-                    AbstractPeriod.CollapseTwo(firstDate, secondDate);
+                    AbstractPeriod.CollapseTwo(firstDate, secondDate, isLinked);
                 }
                 else
                 {
-                    AbstractPeriod.CollapseTwo(secondDate, firstDate);
+                    AbstractPeriod.CollapseTwo(secondDate, firstDate, isLinked);
                 }
 
                 int duplicateGroup;
@@ -430,16 +430,16 @@ namespace Hors
             return false;
         }
         
-        private bool TakeFromAdjacent(Match match, DatesRawData data, DateTime userDate)
+        private bool TakeFromAdjacent(Match match, DatesRawData data, DateTime userDate, bool isLinked)
         {
-            TakeFromAdjacent(data, match.Groups[2].Index, match.Groups[5].Index);
+            TakeFromAdjacent(data, match.Groups[2].Index, match.Groups[5].Index, isLinked);
 
             // this method doesn't modify tokens or array
             return false;
         }
 
         private (AbstractPeriod firstDate, AbstractPeriod secondDate) TakeFromAdjacent(
-            DatesRawData data, int firstIndex, int secondIndex
+            DatesRawData data, int firstIndex, int secondIndex, bool isLinked
         )
         {
             var firstDate = data.Dates[firstIndex];
@@ -453,11 +453,11 @@ namespace Hors
 
             if (firstDate.MinFixed() > secondCopy.MinFixed())
             {
-                AbstractPeriod.CollapseTwo(firstDate, secondCopy);
+                AbstractPeriod.CollapseTwo(firstDate, secondCopy, isLinked);
             }
             else
             {
-                AbstractPeriod.CollapseTwo(secondCopy, firstDate);
+                AbstractPeriod.CollapseTwo(secondCopy, firstDate, isLinked);
                 data.Dates[firstIndex] = secondCopy;
                 secondCopy.Start = firstDate.Start;
                 secondCopy.End = firstDate.End;
@@ -465,11 +465,11 @@ namespace Hors
 
             if (secondDate.MinFixed() > firstCopy.MinFixed())
             {
-                AbstractPeriod.CollapseTwo(secondDate, firstCopy);
+                AbstractPeriod.CollapseTwo(secondDate, firstCopy, isLinked);
             }
             else
             {
-                AbstractPeriod.CollapseTwo(firstCopy, secondDate);
+                AbstractPeriod.CollapseTwo(firstCopy, secondDate, isLinked);
                 data.Dates[secondIndex] = firstCopy;
                 firstCopy.Start = secondDate.Start;
                 firstCopy.End = secondDate.End;

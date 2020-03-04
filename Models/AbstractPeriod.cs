@@ -118,7 +118,7 @@ namespace Hors.Models
             return basePeriod.SpanDirection != -coverPeriod.SpanDirection || basePeriod.SpanDirection == 0;
         }
 
-        public static bool CollapseTwo(AbstractPeriod basePeriod, AbstractPeriod coverPeriod)
+        public static bool CollapseTwo(AbstractPeriod basePeriod, AbstractPeriod coverPeriod, bool isLinked)
         {
             if (!CanCollapse(basePeriod, coverPeriod)) return false;
 
@@ -208,7 +208,12 @@ namespace Hors.Models
                 {
                     if (basePeriod.Time.Hours <= 12 && coverPeriod.Time.Hours > 12)
                     {
-                        basePeriod.Time += new TimeSpan(12, 0, 0);
+                        // first period is uncertain and second is certain
+                        if (!isLinked)
+                        {
+                            // add 12 hours if these to periods are NOT part of 'from-two' chain
+                            basePeriod.Time += new TimeSpan(12, 0, 0);
+                        }
                     }
                 }
 
