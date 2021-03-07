@@ -164,6 +164,9 @@ namespace Hors
                         case FixPeriod.Month:
                             dateTo = dateTo.AddYears(1);
                             break;
+                        default:
+                            dateTo = dateTo.AddHours(12);
+                            break;
                     }
                 }
 
