@@ -1,5 +1,6 @@
 using System;
 using System.Text.RegularExpressions;
+using Hors.Dict;
 using Hors.Models;
 
 namespace Hors.Recognizers
@@ -15,36 +16,44 @@ namespace Hors.Recognizers
         {
             if (match.Groups[1].Success || match.Groups[3].Success)
             {
-                var hours = 0;
+                var hourStart = 0;
+                var hourEnd = 0;
                 switch (match.Groups[2].Value)
                 {
                     case "r": // morning 
-                        hours = 9;
+                        hourStart = 5;
+                        hourEnd = 11;
                         break;
                     case "a": // day
                     case "d":
+                        hourStart = 11;
+                        hourEnd = 15;
+                        break;
                     case "n": // noon
-                        hours = 12;
+                        hourStart = 12;
+                        hourEnd = 12;
                         break;
                     case "v": // evening
-                        hours = 17;
+                        hourStart = 15;
+                        hourEnd = 23;
                         break;
                     case "g": // night
-                        hours = 23;
+                        hourStart = 23;
+                        hourEnd = 5;
                         break;
                 }
 
-                if (hours != 0)
+                if (hourStart != 0)
                 {
                     var date = new AbstractPeriod
                     {
-                        Time = new TimeSpan(hours, 0, 0)
+                        Time = new TimeSpan(hourStart, 0, 0)
                     };
                     date.Fix(FixPeriod.TimeUncertain);
-                
+
                     // remove and insert
                     var startIndex = match.Index;
-                    var length = match.Length - 1; // skip date at the beginning or ar the end
+                    var length = match.Length - 1; // skip date at the beginning or at the end
                     if (match.Groups[1].Success)
                     {
                         // skip first date
@@ -55,7 +64,21 @@ namespace Hors.Recognizers
                             length--;
                         }
                     }
-                    data.ReplaceTokensByDates(startIndex, length, date);
+
+                    if (hourEnd == hourStart)
+                    {
+                        data.ReplaceTokensByDates(startIndex, length, date);
+                    }
+                    else
+                    {
+                        var dateEnd = new AbstractPeriod
+                        {
+                            Time = new TimeSpan(hourEnd, 0, 0)
+                        };
+                        dateEnd.Fix(FixPeriod.TimeUncertain);
+                        data.ReplaceTokensByDates(startIndex, length, date, dateEnd);
+                        data.ReturnTokens(startIndex + 1, "t", new TextToken(Keywords.TimeTo[0]));
+                    }
 
                     return true;
                 }

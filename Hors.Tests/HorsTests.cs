@@ -64,6 +64,22 @@ namespace Hors.Tests
         }
 
         [Test]
+        public void TestTimePeriodUncertain()
+        {
+            var parser = new HorsTextParser();
+            var result = parser.Parse(
+                "с 2 до 5 событие",
+                new DateTime(2019, 10, 13), 1
+            );
+            
+            Assert.AreEqual(1, result.Dates.Count);
+            var date = result.Dates.First();
+            Assert.AreEqual(DateTimeTokenType.Period, date.Type);
+            Assert.AreEqual(14, date.DateFrom.Hour);
+            Assert.AreEqual(17, date.DateTo.Hour);
+        }
+
+        [Test]
         public void TestDaytime()
         {
             var parser = new HorsTextParser();
@@ -103,7 +119,7 @@ namespace Hors.Tests
             Assert.AreEqual(1, thirdDate.DateFrom.Day);
         }
 
-        [Test]
+        /*[Test] TODO this type of recognition
         public void TestLongPeriod()
         {
             var parser = new HorsTextParser();
@@ -122,6 +138,41 @@ namespace Hors.Tests
             Assert.AreEqual(12, date.DateTo.Month);
             Assert.AreEqual(9, date.DateTo.Hour);
             Assert.AreEqual(15, date.DateTo.Minute);
+        }*/
+        
+        [Test]
+        public void TestNextMonth()
+        {
+            var parser = new HorsTextParser();
+            var result = parser.Parse(
+                "В следующем месяце",
+                new DateTime(2019, 10, 14), 3
+            );
+            
+            Assert.AreEqual(1, result.Dates.Count);
+            var date = result.Dates.First();
+            Assert.AreEqual(DateTimeTokenType.Period, date.Type);
+            Assert.AreEqual(2019, date.DateFrom.Year);
+            Assert.AreEqual(1, date.DateFrom.Day);
+            Assert.AreEqual(11, date.DateFrom.Month);
+            Assert.AreEqual(30, date.DateTo.Day);
+            Assert.AreEqual(11, date.DateTo.Month);
+        }
+        
+        [Test]
+        public void TestEvening()
+        {
+            var parser = new HorsTextParser();
+            var result = parser.Parse(
+                "Завтра вечером кино",
+                new DateTime(2019, 10, 16), 3
+            );
+            
+            Assert.AreEqual(1, result.Dates.Count);
+            var date = result.Dates.First();
+            Assert.AreEqual(DateTimeTokenType.Period, date.Type);
+            Assert.AreEqual(15, date.DateFrom.Hour);
+            Assert.AreEqual(23, date.DateTo.Hour);
         }
 
         [Test]

@@ -25,7 +25,7 @@ namespace Hors.Models
         private void InsertDates(int index, params AbstractPeriod[] dates)
         {
             if (dates.Length == 0) return;
-            InsertData(index, "@", "{}", dates);
+            InsertDate(index, "@", "{}", dates);
         }
 
         public void ReplaceTokensByDates(int start, int removeCount, params AbstractPeriod[] dates)
@@ -53,7 +53,7 @@ namespace Hors.Models
             Pattern = $"{prefix}{pattern}{suffix}";
         }
 
-        public void InsertData(int index, string pattern, string token, params AbstractPeriod[] dates)
+        public void InsertDate(int index, string pattern, string token, params AbstractPeriod[] dates)
         {
             Dates.InsertRange(index, dates);
             Tokens.InsertRange(index, Enumerable.Repeat(new TextToken(token), dates.Length));
